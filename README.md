@@ -47,7 +47,7 @@ Structs:
 1. The data schema is documented by the Go type definition. This helps ensure
    data is written consistently to the database.
 1. All the code for decoding and encoding the various data types supported
-   by InfluxDb and handled in one place, rather than repeating this logic over
+   by InfluxDb are handled in one place, rather than repeating this logic over
    and over for every Query.
 1. Likewise, code for handling arrays can be in one place.
 1. Reading and Writing data is much simpler and requires way less code.
