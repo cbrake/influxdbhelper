@@ -49,13 +49,14 @@ use the Go reflect functionality.
 # Status
 
 This library is currently in the proof of concept phase, and the code is not
-optimized for performance.
+optimized for performance, nor is it very clean at this point.
 
 Todo:
 
-* [ ] optimize query for performace (pre-allocate slices, etc)
+* [ ] handle larger query datasets (multiple series, etc)
 * [ ] add write capability (directly write Go structs into influxdb)
 * [ ] use Go struct field tags to help build SELECT statement
+* [ ] optimize query for performace (pre-allocate slices, etc)
 
 # License
 
