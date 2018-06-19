@@ -2,9 +2,19 @@ package influxdbhelper
 
 import (
 	"errors"
+	"regexp"
+	"strings"
 
 	client "github.com/influxdata/influxdb/client/v2"
 )
+
+var reRemoveExtraSpace = regexp.MustCompile(`\s\s+`)
+
+func CleanQuery(query string) string {
+	ret := strings.Replace(query, "\n", "", -1)
+	ret = reRemoveExtraSpace.ReplaceAllString(ret, " ")
+	return ret
+}
 
 type Client struct {
 	url    string
@@ -25,6 +35,10 @@ func NewClient(url, user, passwd string) (*Client, error) {
 	ret.client = client
 
 	return &ret, err
+}
+
+func (h Client) InfluxClient() client.Client {
+	return h.client
 }
 
 func (h Client) Query(db, cmd string, result interface{}) (err error) {
