@@ -2,10 +2,8 @@
 
 > easily write and query InfluxDb from Go programs
 
-This library allows you to interface with InfluxDb databases with
-Go structs -- similiar to how you are using to interfacing with
-JSON data, MongoDb, and other databases. Struct field tags are
-used to map InfluxDb tags and values to struct fields.
+This library allows you to encode/decode InfluxDb data to/from
+Go structs -- similiar to JSON and MongoDb using Go struct field tags.
 
 ## Install
 
