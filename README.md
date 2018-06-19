@@ -41,16 +41,22 @@ var events []PumpEvent
 err = client.Query("mydb", query, &events)
 ```
 
-# Acknowledgments
+## Details
+
+The decode_test.go file contains a number of tests that illustrate the
+conversion from influx JSON to Go struct values.
+
+## Acknowledgments
 
 The [mapstructure](https://github.com/mitchellh/mapstructure)
 library provided a very useful reference for learning how to
 use the Go reflect functionality.
 
-# Status
+## Status
 
 This library is currently in the proof of concept phase, and the code is not
-optimized for performance, nor is it very clean at this point.
+optimized for performance, nor is it very clean at this point. If there are other
+libraries that do similiar things, I would be very interested in learning about them.
 
 Todo:
 
@@ -58,7 +64,10 @@ Todo:
 * [ ] add write capability (directly write Go structs into influxdb)
 * [ ] use Go struct field tags to help build SELECT statement
 * [ ] optimize query for performace (pre-allocate slices, etc)
+* [ ] decode/encode val0, val1, val2 fields in influx to Go array
 
-# License
+Pull requests welcome!
+
+## License
 
 MIT
