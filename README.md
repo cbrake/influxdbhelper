@@ -10,6 +10,7 @@ used to map InfluxDb tags and values to struct fields.
 ## Install
 
 ```
+go get github.com/influxdata/influxdb/client/v2
 go get github.com/cbrake/influxdbhelper
 ```
 
