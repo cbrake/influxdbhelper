@@ -81,6 +81,7 @@ Todo:
 * [ ] optimize query for performace (pre-allocate slices, etc)
 * [ ] decode/encode val0, val1, val2 fields in influx to Go array
 * [ ] come up with a better name (indecode, ingodec, etc)
+* [ ] add godoc documentation
 
 Pull requests welcome!
 
