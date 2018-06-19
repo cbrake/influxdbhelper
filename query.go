@@ -6,13 +6,13 @@ import (
 	client "github.com/influxdata/influxdb/client/v2"
 )
 
-type InfluxDbHelper struct {
+type Client struct {
 	url    string
 	client client.Client
 }
 
-func NewInfluxDbHelper(url, user, passwd string) (*InfluxDbHelper, error) {
-	ret := InfluxDbHelper{
+func NewClient(url, user, passwd string) (*Client, error) {
+	ret := Client{
 		url: url,
 	}
 
@@ -27,7 +27,7 @@ func NewInfluxDbHelper(url, user, passwd string) (*InfluxDbHelper, error) {
 	return &ret, err
 }
 
-func (h InfluxDbHelper) Query(db, cmd string, result interface{}) (err error) {
+func (h Client) Query(db, cmd string, result interface{}) (err error) {
 	query := client.Query{
 		Command:   cmd,
 		Database:  db,
