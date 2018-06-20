@@ -4,6 +4,7 @@ import (
 	"errors"
 	"regexp"
 	"strings"
+	"time"
 
 	client "github.com/influxdata/influxdb/client/v2"
 )
@@ -17,13 +18,15 @@ func CleanQuery(query string) string {
 }
 
 type Client struct {
-	url    string
-	client client.Client
+	url       string
+	client    client.Client
+	precision string
 }
 
-func NewClient(url, user, passwd string) (*Client, error) {
+func NewClient(url, user, passwd, precision string) (*Client, error) {
 	ret := Client{
-		url: url,
+		url:       url,
+		precision: precision,
 	}
 
 	client, err := client.NewHTTPClient(client.HTTPConfig{
@@ -37,11 +40,11 @@ func NewClient(url, user, passwd string) (*Client, error) {
 	return &ret, err
 }
 
-func (h Client) InfluxClient() client.Client {
-	return h.client
+func (c Client) InfluxClient() client.Client {
+	return c.client
 }
 
-func (h Client) Query(db, cmd string, result interface{}) (err error) {
+func (c Client) Query(db, cmd string, result interface{}) (err error) {
 	query := client.Query{
 		Command:   cmd,
 		Database:  db,
@@ -50,7 +53,7 @@ func (h Client) Query(db, cmd string, result interface{}) (err error) {
 	}
 
 	var response *client.Response
-	response, err = h.client.Query(query)
+	response, err = c.client.Query(query)
 
 	if response.Error() != nil {
 		return response.Error()
@@ -71,4 +74,26 @@ func (h Client) Query(db, cmd string, result interface{}) (err error) {
 	err = Decode(series.Columns, series.Values, result)
 
 	return
+}
+
+func (c Client) WritePoint(db, measurement string, tags map[string]string, fields map[string]interface{}, t time.Time) error {
+
+	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
+		Database:  db,
+		Precision: c.precision,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	pt, err := client.NewPoint(measurement, tags, fields, t)
+
+	if err != nil {
+		return err
+	}
+
+	bp.AddPoint(pt)
+
+	return c.client.Write(bp)
 }
