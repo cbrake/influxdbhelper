@@ -48,7 +48,7 @@ func (c Client) Query(db, cmd string, result interface{}) (err error) {
 	query := client.Query{
 		Command:   cmd,
 		Database:  db,
-		Chunked:   true,
+		Chunked:   false,
 		ChunkSize: 100,
 	}
 
