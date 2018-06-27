@@ -78,6 +78,11 @@ func Decode(columns []string, values [][]interface{}, result interface{}) error 
 				continue
 			}
 
+			if vIn[i] == nil {
+				fmt.Println("nil in query results, consider tightening query, col: ", tag)
+				continue
+			}
+
 			if f.Type() == reflect.TypeOf(time.Time{}) {
 				timeS, ok := vIn[i].(string)
 				if !ok {
