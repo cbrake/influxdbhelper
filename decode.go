@@ -79,7 +79,6 @@ func Decode(columns []string, values [][]interface{}, result interface{}) error 
 			}
 
 			if vIn[i] == nil {
-				fmt.Println("nil in query results, consider tightening query, col: ", tag)
 				continue
 			}
 
