@@ -1,7 +1,6 @@
 package influxdbhelper
 
 import (
-	"errors"
 	"regexp"
 	"strings"
 	"time"
@@ -65,7 +64,6 @@ func (c Client) Query(db, cmd string, result interface{}) (err error) {
 
 	results := response.Results
 	if len(results) < 1 || len(results[0].Series) < 1 {
-		err = errors.New("No data returned")
 		return
 	}
 
