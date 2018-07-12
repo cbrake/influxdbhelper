@@ -12,6 +12,7 @@ import (
 
 func TestDecode(t *testing.T) {
 	columns := []string{
+		"tagValue",
 		"intValue",
 		"floatValue",
 		"boolValue",
@@ -23,6 +24,7 @@ func TestDecode(t *testing.T) {
 	values := [][]interface{}{}
 
 	type DecodeType struct {
+		TagValue    string  `influx:"tagValue,tag"`
 		IntValue    int     `influx:"intValue"`
 		FloatValue  float64 `influx:"floatValue"`
 		BoolValue   bool    `influx:"boolValue"`
@@ -33,6 +35,7 @@ func TestDecode(t *testing.T) {
 
 	for i := 0; i < 10; i++ {
 		v := DecodeType{
+			"tag-value",
 			i,
 			float64(i),
 			math.Mod(float64(i), 2) == 0,
@@ -40,6 +43,7 @@ func TestDecode(t *testing.T) {
 		}
 
 		v_ := []interface{}{
+			v.TagValue,
 			v.IntValue,
 			v.FloatValue,
 			v.BoolValue,

@@ -21,13 +21,28 @@ if err != nil {
 	...
 }
 
+// structs used to read/write influxdb must contain a Time field,
+// and all fields marked with the "tag" tag must be a string, as InfluxDb
+// only allows strings to be used as tags.
 type PumpEvent struct {
 	Time      time.Time     `influx:"time"`
 	Duration  time.Duration `influx:"-"`
 	DurationS float64       `influx:"durationS"`
-        PumpIndex string        `influx:"pumpIndex"`
+        PumpIndex string        `influx:"pumpIndex,tag"`
         Value     float64       `influx:"value"`
 }
+
+p := PumpEvent{
+	Time: time.Now(),
+	Duration: time.Minute*2,
+	DurationS: 60*2,
+	PumpIndex: "1",
+	Value: 350,
+}
+
+// WritePoint uses PumpIndex as an InfluxDb tag, and the rest of the struct fields as
+// InfluxDb fields.
+err = client.WritePoint(db, "events", p)
 
 query := `SELECT "durationS","pumpIndex","value"
 	from myMeasurement
@@ -75,7 +90,7 @@ libraries that do similiar things, I would be very interested in learning about 
 
 Todo:
 
-* [ ] handle larger query datasets (multiple series, etc)
+* [x] handle larger query datasets (multiple series, etc)
 * [ ] add write capability (directly write Go structs into influxdb)
 * [ ] use Go struct field tags to help build SELECT statement
 * [ ] optimize query for performace (pre-allocate slices, etc)

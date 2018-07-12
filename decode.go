@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -68,7 +69,15 @@ func Decode(columns []string, values [][]interface{}, result interface{}) error 
 			if tag == "-" {
 				continue
 			}
+			// strip out "tag"
+			tags := strings.Split(tag, ",")
+			for _, t := range tags {
+				if t != "tag" {
+					tag = t
+				}
+			}
 			i, ok := colIndex[tag]
+
 			if !ok {
 				if !missingTagError {
 					err := errors.New(fmt.Sprintf("Missing tag: %v", tag))
