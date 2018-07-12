@@ -24,11 +24,12 @@ func TestDecode(t *testing.T) {
 	values := [][]interface{}{}
 
 	type DecodeType struct {
-		TagValue    string  `influx:"tagValue,tag"`
-		IntValue    int     `influx:"intValue"`
-		FloatValue  float64 `influx:"floatValue"`
-		BoolValue   bool    `influx:"boolValue"`
-		StringValue string  `influx:"stringValue"`
+		TagValue     string  `influx:"tagValue,tag"`
+		IntValue     int     `influx:"intValue"`
+		FloatValue   float64 `influx:"floatValue"`
+		BoolValue    bool    `influx:"boolValue"`
+		StringValue  string  `influx:"stringValue"`
+		IgnoredValue string  `influx:"-"`
 	}
 
 	expected := []DecodeType{}
@@ -40,6 +41,7 @@ func TestDecode(t *testing.T) {
 			float64(i),
 			math.Mod(float64(i), 2) == 0,
 			strconv.Itoa(i),
+			"",
 		}
 
 		v_ := []interface{}{
