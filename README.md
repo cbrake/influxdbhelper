@@ -26,9 +26,9 @@ if err != nil {
 // only allows strings to be used as tags.
 type PumpEvent struct {
 	Time      time.Time     `influx:"time"`
-	Duration  time.Duration `influx:"-"`
+	Duration  time.Duration `influx:"-"`              // ignored field
 	DurationS float64       `influx:"durationS"`
-        PumpIndex string        `influx:"pumpIndex,tag"`
+        PumpIndex string        `influx:"pumpIndex,tag"`  // written as tag (vs field)
         Value     float64       `influx:"value"`
 }
 
