@@ -62,7 +62,10 @@ There are several advantages decoding and encoding data directly from Go
 Structs:
 
 1. The data schema is documented by the Go type definition. This helps ensure
-   data is written consistently to the database.
+   data is written consistently to the database. When all your data is clearly
+   defined in Go structs, it is much more obvious how to organize it, and how to
+   organize data in measurements. When writing straight tags/values, it is
+   much easier to create a disorganized mess.
 1. All the code for decoding and encoding the various data types supported
    by InfluxDb are handled in one place, rather than repeating this logic over
    and over for every Query.
