@@ -3,9 +3,10 @@ package influxdbhelper
 import (
 	"errors"
 	"reflect"
+	"time"
 )
 
-func Encode(d interface{}) (tags map[string]string,
+func Encode(d interface{}) (t time.Time, tags map[string]string,
 	fields map[string]interface{}, err error) {
 	tags = make(map[string]string)
 	fields = make(map[string]interface{})
@@ -23,6 +24,12 @@ func Encode(d interface{}) (tags map[string]string,
 		name := getInfluxFieldTagName(fieldTag)
 
 		if name == "-" {
+			continue
+		}
+
+		if name == "time" {
+			// TODO error checking
+			t = f.Interface().(time.Time)
 			continue
 		}
 

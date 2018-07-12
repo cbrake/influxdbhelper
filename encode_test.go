@@ -3,12 +3,11 @@ package influxdbhelper
 import (
 	"reflect"
 	"testing"
-
-	"github.com/y0ssar1an/q"
+	"time"
 )
 
 func TestEncodeDataNotStruct(t *testing.T) {
-	_, _, err := Encode([]int{1, 2, 3})
+	_, _, _, err := Encode([]int{1, 2, 3})
 	if err == nil {
 		t.Error("Expected error")
 	}
@@ -16,15 +15,17 @@ func TestEncodeDataNotStruct(t *testing.T) {
 
 func TestEncode(t *testing.T) {
 	type MyType struct {
-		TagValue     string  `influx:"tagValue,tag"`
-		IntValue     int     `influx:"intValue"`
-		FloatValue   float64 `influx:"floatValue"`
-		BoolValue    bool    `influx:"boolValue"`
-		StringValue  string  `influx:"stringValue"`
-		IgnoredValue string  `influx:"-"`
+		Time         time.Time `influx:"time"`
+		TagValue     string    `influx:"tagValue,tag"`
+		IntValue     int       `influx:"intValue"`
+		FloatValue   float64   `influx:"floatValue"`
+		BoolValue    bool      `influx:"boolValue"`
+		StringValue  string    `influx:"stringValue"`
+		IgnoredValue string    `influx:"-"`
 	}
 
 	d := MyType{
+		time.Now(),
 		"tag-value",
 		10,
 		10.5,
@@ -32,6 +33,8 @@ func TestEncode(t *testing.T) {
 		"string",
 		"ignored",
 	}
+
+	timeExp := d.Time
 
 	tagsExp := map[string]string{
 		"tagValue": "tag-value",
@@ -44,10 +47,14 @@ func TestEncode(t *testing.T) {
 		"stringValue": d.StringValue,
 	}
 
-	tags, fields, err := Encode(d)
+	tm, tags, fields, err := Encode(d)
 
 	if err != nil {
 		t.Error("Error encoding: ", err)
+	}
+
+	if !tm.Equal(timeExp) {
+		t.Error("Time does not match")
 	}
 
 	if !reflect.DeepEqual(tags, tagsExp) {
@@ -55,8 +62,6 @@ func TestEncode(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(fields, fieldsExp) {
-		q.Q(fields)
-		q.Q(fieldsExp)
 		t.Error("fields not encoded correctly")
 	}
 }

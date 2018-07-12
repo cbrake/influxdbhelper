@@ -3,7 +3,6 @@ package influxdbhelper
 import (
 	"regexp"
 	"strings"
-	"time"
 
 	client "github.com/influxdata/influxdb/client/v2"
 )
@@ -74,12 +73,17 @@ func (c Client) Query(db, cmd string, result interface{}) (err error) {
 	return
 }
 
-func (c Client) WritePoint(db, measurement string, tags map[string]string, fields map[string]interface{}, t time.Time) error {
-
+func (c Client) WritePoint(db, measurement string, data interface{}) error {
 	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
 		Database:  db,
 		Precision: c.precision,
 	})
+
+	if err != nil {
+		return err
+	}
+
+	t, tags, fields, err := Encode(data)
 
 	if err != nil {
 		return err
