@@ -42,7 +42,7 @@ p := PumpEvent{
 
 // WritePoint uses PumpIndex as an InfluxDb tag, and the rest of the struct fields as
 // InfluxDb fields.
-err = client.WritePoint(db, "events", p)
+err = client.WritePoint(db, "myMeasurement", p)
 
 query := `SELECT "durationS","pumpIndex","value"
 	from myMeasurement
