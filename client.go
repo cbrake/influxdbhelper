@@ -97,6 +97,12 @@ func (c Client) Query(db, cmd string, result interface{}) (err error) {
 	return
 }
 
+// WritePoint is used to write arbitrary data into InfluxDb.
+//
+// data must be a struct with struct field tags that defines the names used
+// in InfluxDb for each field. A "tag" tag can be added to indicate the
+// struct field should be an InfluxDb tag (vs field). A tag of '-' indicates
+// the struct field should be ignored.
 func (c Client) WritePoint(db, measurement string, data interface{}) error {
 	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
 		Database:  db,
