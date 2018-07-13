@@ -75,7 +75,7 @@ func Decode(columns []string, values [][]interface{}, result interface{}) error 
 			if !ok {
 				if !missingTagError {
 					err := errors.New(fmt.Sprintf("Missing tag: %v", tag))
-					errs = AppendErrors(errs, err)
+					errs = appendErrors(errs, err)
 					missingTagError = true
 				}
 				continue
@@ -89,12 +89,12 @@ func Decode(columns []string, values [][]interface{}, result interface{}) error 
 				timeS, ok := vIn[i].(string)
 				if !ok {
 					e := errors.New("Time input is not string")
-					errs = AppendErrors(errs, e)
+					errs = appendErrors(errs, e)
 				} else {
 					time, err := time.Parse(time.RFC3339, timeS)
 					if err != nil {
 						e := errors.New("Error parsing time")
-						errs = AppendErrors(errs, e)
+						errs = appendErrors(errs, e)
 					} else {
 						vIn[i] = time
 					}
@@ -107,7 +107,7 @@ func Decode(columns []string, values [][]interface{}, result interface{}) error 
 					vIn__, err := strconv.ParseFloat(string(vIn_), 64)
 					if err != nil {
 						es := "error converting json.Number"
-						errs = AppendErrors(errs, errors.New(es))
+						errs = appendErrors(errs, errors.New(es))
 					}
 					vIn[i] = vIn__
 				} else {
@@ -115,7 +115,7 @@ func Decode(columns []string, values [][]interface{}, result interface{}) error 
 					vIn__, err := strconv.Atoi(string(vIn_))
 					if err != nil {
 						es := "error converting json.Number"
-						errs = AppendErrors(errs, errors.New(es))
+						errs = appendErrors(errs, errors.New(es))
 					}
 					vIn[i] = vIn__
 				}
@@ -128,7 +128,7 @@ func Decode(columns []string, values [][]interface{}, result interface{}) error 
 						reflect.TypeOf(vIn[i]).String(),
 						f.Type().String())
 
-					errs = AppendErrors(errs, errors.New(es))
+					errs = appendErrors(errs, errors.New(es))
 					typeError = true
 				}
 				continue

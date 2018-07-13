@@ -43,7 +43,7 @@ func (e *Error) WrappedErrors() []error {
 	return result
 }
 
-func AppendErrors(errors []string, err error) []string {
+func appendErrors(errors []string, err error) []string {
 	switch e := err.(type) {
 	case *Error:
 		return append(errors, e.Errors...)
