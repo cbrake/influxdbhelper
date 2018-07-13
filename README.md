@@ -107,7 +107,8 @@ Structs:
 1. All the code for decoding and encoding the various data types supported
    by InfluxDb are handled in one place, rather than repeating this logic over
    and over for every Query.
-1. Likewise, code for handling arrays can be in one place.
+1. Likewise, code for handling arrays (translating Go array to InfluxDb fields
+   like temp0, temp1, temp2, ...) can be in one place.
 1. Reading and Writing data is much simpler and requires way less code.
 
 Using Go reflection to automate data decode may be slightly slower
