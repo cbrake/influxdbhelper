@@ -5,6 +5,8 @@
 This library allows you to encode/decode InfluxDb data to/from
 Go structs -- similiar to JSON and MongoDb using Go struct field tags.
 
+See [GoDoc](https://godoc.org/github.com/cbrake/influxdbhelper) for more documentation.
+
 ## Install
 
 ```
@@ -97,7 +99,7 @@ func main() {
 There are several advantages decoding and encoding data directly from Go
 Structs:
 
-1. The data schema is documented by the Go type definition. This helps ensure
+1. The database bschema is documented by the Go type definition. This helps ensure
    data is written consistently to the database. When all your data is clearly
    defined in Go structs, it is much more obvious how to organize it, what goes
    in what measurement, when to create a new measurement, etc. When writing
@@ -133,13 +135,14 @@ Todo:
 
 * [x] handle larger query datasets (multiple series, etc)
 * [x] add write capability (directly write Go structs into influxdb)
+* [x] add godoc documentation
+* [ ] decode/encode val0, val1, val2 fields in influx to Go array
 * [ ] use Go struct field tags to help build SELECT statement
 * [ ] optimize query for performace (pre-allocate slices, etc)
-* [ ] decode/encode val0, val1, val2 fields in influx to Go array
-* [ ] come up with a better name (indecode, ingodec, etc)
-* [ ] add godoc documentation
+* [ ] come up with a better name (indecode, etc)
+* [ ] finish error checking
 
-Pull requests welcome!
+Review/Pull requests welcome!
 
 ## License
 
