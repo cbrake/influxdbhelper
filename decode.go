@@ -9,7 +9,11 @@ import (
 	"time"
 )
 
-func Decode(columns []string, values [][]interface{}, result interface{}) error {
+// Decode is used to process data returned by an InfluxDb query and uses reflection
+// to transform it into an array of structs of type result.
+//
+// This function is used internally by the Query function.
+func decode(columns []string, values [][]interface{}, result interface{}) error {
 	colIndex := map[string]int{}
 	for i, col := range columns {
 		colIndex[col] = i

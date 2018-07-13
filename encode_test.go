@@ -7,7 +7,7 @@ import (
 )
 
 func TestEncodeDataNotStruct(t *testing.T) {
-	_, _, _, err := Encode([]int{1, 2, 3})
+	_, _, _, err := encode([]int{1, 2, 3})
 	if err == nil {
 		t.Error("Expected error")
 	}
@@ -47,7 +47,7 @@ func TestEncode(t *testing.T) {
 		"stringValue": d.StringValue,
 	}
 
-	tm, tags, fields, err := Encode(d)
+	tm, tags, fields, err := encode(d)
 
 	if err != nil {
 		t.Error("Error encoding: ", err)

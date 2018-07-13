@@ -92,7 +92,7 @@ func (c Client) Query(db, cmd string, result interface{}) (err error) {
 
 	series := results[0].Series[0]
 
-	err = Decode(series.Columns, series.Values, result)
+	err = decode(series.Columns, series.Values, result)
 
 	return
 }
@@ -107,7 +107,7 @@ func (c Client) WritePoint(db, measurement string, data interface{}) error {
 		return err
 	}
 
-	t, tags, fields, err := Encode(data)
+	t, tags, fields, err := encode(data)
 
 	if err != nil {
 		return err

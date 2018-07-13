@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func Encode(d interface{}) (t time.Time, tags map[string]string,
+func encode(d interface{}) (t time.Time, tags map[string]string,
 	fields map[string]interface{}, err error) {
 	tags = make(map[string]string)
 	fields = make(map[string]interface{})

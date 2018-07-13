@@ -59,7 +59,7 @@ func TestDecode(t *testing.T) {
 
 	decoded := []DecodeType{}
 
-	err := Decode(columns, values, &decoded)
+	err := decode(columns, values, &decoded)
 	if err != nil {
 		t.Error("Error decoding: ", err)
 	}
@@ -87,7 +87,7 @@ func TestDecodeMissingColumn(t *testing.T) {
 
 	decoded := []DecodeType{}
 
-	err := Decode(columns, values, &decoded)
+	err := decode(columns, values, &decoded)
 	if err == nil {
 		t.Error("Expected error decoding: ", err)
 	} else {
@@ -117,7 +117,7 @@ func TestDecodeWrongType(t *testing.T) {
 
 	decoded := []DecodeType{}
 
-	err := Decode(columns, values, &decoded)
+	err := decode(columns, values, &decoded)
 	if err == nil {
 		t.Error("Expected error decoding: ", err)
 	} else {
@@ -153,7 +153,7 @@ func TestDecodeTime(t *testing.T) {
 
 	decoded := []DecodeType{}
 
-	err = Decode(columns, values, &decoded)
+	err = decode(columns, values, &decoded)
 	if err != nil {
 		t.Error("Error decoding: ", err)
 	}
@@ -181,7 +181,7 @@ func TestDecodeJsonNumber(t *testing.T) {
 
 	decoded := []DecodeType{}
 
-	err := Decode(columns, values, &decoded)
+	err := decode(columns, values, &decoded)
 	if err != nil {
 		t.Error("Error decoding: ", err)
 	}
@@ -209,7 +209,7 @@ func TestDecodeUnsedStructValue(t *testing.T) {
 
 	decoded := []DecodeType{}
 
-	err := Decode(columns, values, &decoded)
+	err := decode(columns, values, &decoded)
 	if err != nil {
 		t.Error("Error decoding: ", err)
 	}
