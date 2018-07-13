@@ -9,18 +9,29 @@ import (
 
 var reRemoveExtraSpace = regexp.MustCompile(`\s\s+`)
 
+// CleanQuery can be used to strip a query string of
+// newline characters. Typically only used for debugging.
 func CleanQuery(query string) string {
 	ret := strings.Replace(query, "\n", "", -1)
 	ret = reRemoveExtraSpace.ReplaceAllString(ret, " ")
 	return ret
 }
 
+// A Client is represents an influxdbhelper client connection to
+// an InfluxDb server.
 type Client struct {
 	url       string
 	client    client.Client
 	precision string
 }
 
+// NewClient returns a new influxdbhelper client given a url, user,
+// password, and precision strings.
+//
+// url is typically something like: http://localhost:8086
+//
+// precision can be ‘h’, ‘m’, ‘s’, ‘ms’, ‘u’, or ‘ns’ and is
+// used during write operations.
 func NewClient(url, user, passwd, precision string) (*Client, error) {
 	ret := Client{
 		url:       url,
