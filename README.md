@@ -15,45 +15,81 @@ go get github.com/cbrake/influxdbhelper
 ## Example
 
 ```go
-client, err = influxdbhelper.NewClient("http://localhost:8086", "user", "passwd")
+const (
+	// Static connection configuration
+	influxUrl = "http://localhost:8086"
+	db        = "dbhelper"
+)
 
-if err != nil {
-	...
+var c *influxdbhelper.Client
+
+func Init() (err error) {
+	c, err = influxdbhelper.NewClient(influxUrl, "", "", "ns")
+	if err != nil {
+		return
+	}
+	// Create MM database if it doesn't already exist
+	q := client.NewQuery("CREATE DATABASE "+db, "", "")
+	res, err := c.InfluxClient().Query(q)
+	if err != nil {
+		return err
+	}
+	if res.Error() != nil {
+		return res.Error()
+	}
+	log.Println("dbhelper db initialized")
+	return nil
 }
 
-// structs used to read/write influxdb must contain a Time field,
-// and all fields marked with the "tag" tag must be a string, as InfluxDb
-// only allows strings to be used as tags.
-type PumpEvent struct {
-	Time      time.Time     `influx:"time"`
-	Duration  time.Duration `influx:"-"`              // ignored field
-	DurationS float64       `influx:"durationS"`
-        PumpIndex string        `influx:"pumpIndex,tag"`  // written as tag (vs field)
-        Value     float64       `influx:"value"`
+type EnvSample struct {
+	Time        time.Time `influx:"time"`
+	Location    string    `influx:"location,tag"`
+	Temperature float64   `influx:"temperature"`
+	Humidity    float64   `influx:"humidity"`
+	Id          string    `influx:"-"`
 }
 
-p := PumpEvent{
-	Time: time.Now(),
-	Duration: time.Minute*2,
-	DurationS: 60*2,
-	PumpIndex: "1",
-	Value: 350,
+func generateSampleData() []EnvSample {
+	ret := make([]EnvSample, 10)
+
+	for i, _ := range ret {
+		ret[i] = EnvSample{
+			Time:        time.Now(),
+			Location:    "Rm 243",
+			Temperature: 70 + float64(i),
+			Humidity:    60 - float64(i),
+			Id:          "12432as32",
+		}
+	}
+
+	return ret
 }
 
-// WritePoint uses PumpIndex as an InfluxDb tag, and the rest of the struct fields as
-// InfluxDb fields.
-err = client.WritePoint(db, "myMeasurement", p)
+func main() {
+	err := Init()
+	if err != nil {
+		log.Fatal("Failed to initialize db")
+	}
 
-query := `SELECT "durationS","pumpIndex","value"
-	from myMeasurement
-	order by time desc
-	limit 50`
+	// write sample data to database
+	samples := generateSampleData()
+	for _, p := range samples {
+		err := c.WritePoint(db, "test", p)
+		if err != nil {
+			log.Fatal("Error writing point: ", err)
+		}
+	}
 
-var events []PumpEvent
+	// query data from db
+	samplesRead := []EnvSample{}
 
-// Query populates the events slice with the data returned from the
-// influxdb query.
-err = client.Query("mydb", query, &events)
+	q := `SELECT * FROM test ORDER BY time DESC LIMIT 10`
+	err = c.Query(db, q, &samplesRead)
+	if err != nil {
+		log.Fatal("Query error: ", err)
+	}
+	log.Printf("Samples read: %+v\n", samplesRead)
+}
 ```
 
 ## Details

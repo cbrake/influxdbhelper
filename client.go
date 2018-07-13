@@ -17,7 +17,7 @@ func CleanQuery(query string) string {
 	return ret
 }
 
-// A Client is represents an influxdbhelper client connection to
+// A Client represents an influxdbhelper client connection to
 // an InfluxDb server.
 type Client struct {
 	url       string
@@ -49,10 +49,23 @@ func NewClient(url, user, passwd, precision string) (*Client, error) {
 	return &ret, err
 }
 
+// InfluxClient returns the influxdb/client/v2 client if low level
+// queries or writes need to be executed.
 func (c Client) InfluxClient() client.Client {
 	return c.client
 }
 
+// Query executes an InfluxDb query, and unpacks the result into the
+// result data structure.
+//
+// result must be an array of structs that contains the fields returned
+// by the query. The struct type must always contain a Time field. The
+// struct type must also include influx field tags which map the struct
+// field name to the InfluxDb field/tag names. This tag is currently
+// required as typically Go struct field names start with a capital letter,
+// and InfluxDb field/tag names typically start with a lower case letter.
+// The struct field tag can be set to '-' which indicates this field
+// should be ignored.
 func (c Client) Query(db, cmd string, result interface{}) (err error) {
 	query := client.Query{
 		Command:   cmd,
