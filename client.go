@@ -102,7 +102,8 @@ func (c Client) Query(db, cmd string, result interface{}) (err error) {
 // data must be a struct with struct field tags that defines the names used
 // in InfluxDb for each field. A "tag" tag can be added to indicate the
 // struct field should be an InfluxDb tag (vs field). A tag of '-' indicates
-// the struct field should be ignored.
+// the struct field should be ignored. A struct field of Time is required and
+// is used for the time of the sample.
 func (c Client) WritePoint(db, measurement string, data interface{}) error {
 	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
 		Database:  db,
