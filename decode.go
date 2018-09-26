@@ -58,7 +58,6 @@ func decode(columns []string, values [][]interface{}, result interface{}) error 
 	// Accumulate any errors
 	errs := make([]string, 0)
 
-	missingTagError := false
 	typeError := false
 
 	for _, vIn := range values {
@@ -77,11 +76,6 @@ func decode(columns []string, values [][]interface{}, result interface{}) error 
 			i, ok := colIndex[tag]
 
 			if !ok {
-				if !missingTagError {
-					err := fmt.Errorf("Missing tag: %v", tag)
-					errs = appendErrors(errs, err)
-					missingTagError = true
-				}
 				continue
 			}
 

@@ -43,11 +43,15 @@ type envSample struct {
 	ID          string    `influx:"-"`
 }
 
+// we populate a few more fields when reading back
+// date to verify unused fields are handled correctly
 type envSampleRead struct {
 	Time        time.Time `influx:"time"`
 	Location    string    `influx:"location,tag"`
+	City        string    `influx:"city,tag"`
 	Temperature float64   `influx:"temperature"`
 	Humidity    float64   `influx:"humidity"`
+	Cycles      float64   `influx:"cycles"`
 	ID          string    `influx:"-"`
 }
 
@@ -83,7 +87,7 @@ func main() {
 	}
 
 	// query data from db
-	samplesRead := []envSample{}
+	samplesRead := []envSampleRead{}
 
 	q := `SELECT * FROM test ORDER BY time DESC LIMIT 10`
 	err = c.Query(db, q, &samplesRead)
