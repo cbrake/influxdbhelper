@@ -10,14 +10,15 @@ import (
 
 const (
 	// Static connection configuration
-	influxUrl = "http://localhost:8086"
+	influxURL = "http://localhost:8086"
 	db        = "dbhelper"
 )
 
 var c *influxdbhelper.Client
 
+// Init initializes the database connection
 func Init() (err error) {
-	c, err = influxdbhelper.NewClient(influxUrl, "", "", "ns")
+	c, err = influxdbhelper.NewClient(influxURL, "", "", "ns")
 	if err != nil {
 		return
 	}
@@ -34,24 +35,32 @@ func Init() (err error) {
 	return nil
 }
 
-type EnvSample struct {
+type envSample struct {
 	Time        time.Time `influx:"time"`
 	Location    string    `influx:"location,tag"`
 	Temperature float64   `influx:"temperature"`
 	Humidity    float64   `influx:"humidity"`
-	Id          string    `influx:"-"`
+	ID          string    `influx:"-"`
 }
 
-func generateSampleData() []EnvSample {
-	ret := make([]EnvSample, 10)
+type envSampleRead struct {
+	Time        time.Time `influx:"time"`
+	Location    string    `influx:"location,tag"`
+	Temperature float64   `influx:"temperature"`
+	Humidity    float64   `influx:"humidity"`
+	ID          string    `influx:"-"`
+}
 
-	for i, _ := range ret {
-		ret[i] = EnvSample{
+func generateSampleData() []envSample {
+	ret := make([]envSample, 10)
+
+	for i := range ret {
+		ret[i] = envSample{
 			Time:        time.Now(),
 			Location:    "Rm 243",
 			Temperature: 70 + float64(i),
 			Humidity:    60 - float64(i),
-			Id:          "12432as32",
+			ID:          "12432as32",
 		}
 	}
 
@@ -74,7 +83,7 @@ func main() {
 	}
 
 	// query data from db
-	samplesRead := []EnvSample{}
+	samplesRead := []envSample{}
 
 	q := `SELECT * FROM test ORDER BY time DESC LIMIT 10`
 	err = c.Query(db, q, &samplesRead)
