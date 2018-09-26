@@ -115,7 +115,7 @@ func (c Client) WritePoint(db, measurement string, data interface{}) error {
 	return c.WritePointTagsFields(db, measurement, tags, fields, t)
 }
 
-// WritePoint is used to write a point specifying tags and fields.
+// WritePointTagsFields is used to write a point specifying tags and fields.
 func (c Client) WritePointTagsFields(db, measurement string, tags map[string]string, fields map[string]interface{}, t time.Time) error {
 	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
 		Database:  db,
