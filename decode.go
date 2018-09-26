@@ -53,7 +53,7 @@ func decode(columns []string, values [][]interface{}, result interface{}) error 
 
 	// not sure why we need to do this, but we need to Set resultSlice
 	// at the end of this function for things to work
-	resultSlice_ := resultSlice
+	resultSliceRet := resultSlice
 
 	// Accumulate any errors
 	errs := make([]string, 0)
@@ -78,7 +78,7 @@ func decode(columns []string, values [][]interface{}, result interface{}) error 
 
 			if !ok {
 				if !missingTagError {
-					err := errors.New(fmt.Sprintf("Missing tag: %v", tag))
+					err := fmt.Errorf("Missing tag: %v", tag)
 					errs = appendErrors(errs, err)
 					missingTagError = true
 				}
@@ -107,21 +107,21 @@ func decode(columns []string, values [][]interface{}, result interface{}) error 
 
 			if reflect.TypeOf(vIn[i]) == reflect.TypeOf(json.Number("1")) {
 				if f.Type() == reflect.TypeOf(1.0) {
-					vIn_, _ := vIn[i].(json.Number)
-					vIn__, err := strconv.ParseFloat(string(vIn_), 64)
+					vInJSONNum, _ := vIn[i].(json.Number)
+					vInFloat, err := strconv.ParseFloat(string(vInJSONNum), 64)
 					if err != nil {
 						es := "error converting json.Number"
 						errs = appendErrors(errs, errors.New(es))
 					}
-					vIn[i] = vIn__
+					vIn[i] = vInFloat
 				} else {
-					vIn_, _ := vIn[i].(json.Number)
-					vIn__, err := strconv.Atoi(string(vIn_))
+					vInJSONNum, _ := vIn[i].(json.Number)
+					vInFloat, err := strconv.Atoi(string(vInJSONNum))
 					if err != nil {
 						es := "error converting json.Number"
 						errs = appendErrors(errs, errors.New(es))
 					}
-					vIn[i] = vIn__
+					vIn[i] = vInFloat
 				}
 			}
 
@@ -142,11 +142,11 @@ func decode(columns []string, values [][]interface{}, result interface{}) error 
 		}
 
 		if valueCount > 0 {
-			resultSlice_ = reflect.Append(resultSlice_, vOut)
+			resultSliceRet = reflect.Append(resultSliceRet, vOut)
 		}
 	}
 
-	resultSlice.Set(resultSlice_)
+	resultSlice.Set(resultSliceRet)
 
 	if len(errs) > 0 {
 		return &Error{errs}

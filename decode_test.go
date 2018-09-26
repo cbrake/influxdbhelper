@@ -44,7 +44,7 @@ func TestDecode(t *testing.T) {
 			"",
 		}
 
-		v_ := []interface{}{
+		vI := []interface{}{
 			v.TagValue,
 			v.IntValue,
 			v.FloatValue,
@@ -53,7 +53,7 @@ func TestDecode(t *testing.T) {
 		}
 
 		expected = append(expected, v)
-		values = append(values, v_)
+		values = append(values, vI)
 
 	}
 
