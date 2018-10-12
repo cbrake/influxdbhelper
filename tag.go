@@ -1,6 +1,10 @@
 package influxdbhelper
 
-import "strings"
+import (
+	"strings"
+)
+
+type Measurement = string
 
 type influxFieldTagData struct {
 	fieldName string

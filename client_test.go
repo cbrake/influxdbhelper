@@ -23,7 +23,7 @@ func ExampleClient_WritePoint() {
 		Id:          "12432as32",
 	}
 
-	c.WritePoint("myDb", "test", s)
+	c.UseDB("myDb").UseMeasurement("test").WritePoint(s)
 }
 
 func ExampleClient_Query() {
@@ -41,7 +41,7 @@ func ExampleClient_Query() {
 
 	q := `SELECT * FROM test ORDER BY time DESC LIMIT 10`
 
-	c.Query("myDb", q, &samplesRead)
+	c.UseDB("myDb").DecodeQuery(q, &samplesRead)
 
 	// samplesRead is now populated with data from InfluxDb
 }

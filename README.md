@@ -23,7 +23,7 @@ const (
 	db        = "dbhelper"
 )
 
-var c *influxdbhelper.Client
+var c influxdbhelper.Client
 
 func Init() (err error) {
 	c, err = influxdbhelper.NewClient(influxUrl, "", "", "ns")
@@ -44,6 +44,7 @@ func Init() (err error) {
 }
 
 type EnvSample struct {
+	InfluxMeasurement      influxdbhelper.Measurement
 	Time        time.Time `influx:"time"`
 	Location    string    `influx:"location,tag"`
 	Temperature float64   `influx:"temperature"`
@@ -56,6 +57,7 @@ func generateSampleData() []EnvSample {
 
 	for i, _ := range ret {
 		ret[i] = EnvSample{
+			InfluxMeasurement: "test"
 			Time:        time.Now(),
 			Location:    "Rm 243",
 			Temperature: 70 + float64(i),
@@ -75,8 +77,9 @@ func main() {
 
 	// write sample data to database
 	samples := generateSampleData()
+	c = c.UseDB(db)
 	for _, p := range samples {
-		err := c.WritePoint(db, "test", p)
+		err := c.WritePoint(p)
 		if err != nil {
 			log.Fatal("Error writing point: ", err)
 		}
@@ -86,7 +89,7 @@ func main() {
 	samplesRead := []EnvSample{}
 
 	q := `SELECT * FROM test ORDER BY time DESC LIMIT 10`
-	err = c.Query(db, q, &samplesRead)
+	err = c.UseDB(db).Query(q, &samplesRead)
 	if err != nil {
 		log.Fatal("Query error: ", err)
 	}

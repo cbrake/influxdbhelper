@@ -7,10 +7,15 @@ import (
 	"time"
 )
 
-func encode(d interface{}) (t time.Time, tags map[string]string, fields map[string]interface{}, err error) {
+func encode(d interface{}) (t time.Time, tags map[string]string, fields map[string]interface{}, measurement string, err error) {
 	tags = make(map[string]string)
 	fields = make(map[string]interface{})
 	dValue := reflect.ValueOf(d)
+
+	if dValue.Kind() == reflect.Ptr {
+		dValue = reflect.Indirect(dValue)
+	}
+
 	if dValue.Kind() != reflect.Struct {
 		err = errors.New("data must be a struct")
 		return
@@ -18,9 +23,13 @@ func encode(d interface{}) (t time.Time, tags map[string]string, fields map[stri
 
 	for i := 0; i < dValue.NumField(); i++ {
 		f := dValue.Field(i)
-		fieldName := dValue.Type().Field(i).Name
+		structFieldName := dValue.Type().Field(i).Name
+		if structFieldName == "InfluxMeasurement" {
+			measurement = f.String()
+			continue
+		}
 		fieldTag := dValue.Type().Field(i).Tag.Get("influx")
-		fieldData := getInfluxFieldTagData(fieldName, fieldTag)
+		fieldData := getInfluxFieldTagData(structFieldName, fieldTag)
 
 		if fieldData.fieldName == "-" {
 			continue
@@ -39,6 +48,10 @@ func encode(d interface{}) (t time.Time, tags map[string]string, fields map[stri
 		if fieldData.isField {
 			fields[fieldData.fieldName] = f.Interface()
 		}
+	}
+
+	if measurement == "" {
+		measurement = dValue.Type().Name()
 	}
 
 	return

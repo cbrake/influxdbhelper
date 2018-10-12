@@ -7,14 +7,33 @@ import (
 )
 
 func TestEncodeDataNotStruct(t *testing.T) {
-	_, _, _, err := encode([]int{1, 2, 3})
+	_, _, _, _, err := encode([]int{1, 2, 3})
 	if err == nil {
 		t.Error("Expected error")
 	}
 }
 
+func TestEncodeSetsMesurment(t *testing.T) {
+	type MyType struct {
+		Val string `influx:"val"`
+	}
+
+	d := &MyType{"test-data"}
+	_, _, _, mesurement, err := encode(d)
+
+	if err != nil {
+		t.Error("Error encoding: ", err)
+	}
+
+	if mesurement != "MyType" {
+		t.Errorf("%v != %v", mesurement, "MyType")
+	}
+
+}
+
 func TestEncode(t *testing.T) {
 	type MyType struct {
+		InfluxMeasurement      Measurement
 		Time             time.Time `influx:"time"`
 		TagValue         string    `influx:"tagValue,tag"`
 		TagAndFieldValue string    `influx:"tagAndFieldValue,tag,field"`
@@ -27,6 +46,7 @@ func TestEncode(t *testing.T) {
 	}
 
 	d := MyType{
+		"test",
 		time.Now(),
 		"tag-value",
 		"tag-and-field-value",
@@ -54,10 +74,18 @@ func TestEncode(t *testing.T) {
 		"StructFieldName":  d.StructFieldName,
 	}
 
-	tm, tags, fields, err := encode(d)
+	tm, tags, fields, mesurement, err := encode(d)
 
 	if err != nil {
 		t.Error("Error encoding: ", err)
+	}
+
+	if mesurement != d.InfluxMeasurement {
+		t.Errorf("%v != %v", mesurement, d.InfluxMeasurement)
+	}
+
+	if _, ok := fields["InfluxMeasurement"]; ok {
+		t.Errorf("Found InfluxMeasurement in the fields!")
 	}
 
 	if !tm.Equal(timeExp) {
