@@ -15,36 +15,43 @@ func TestEncodeDataNotStruct(t *testing.T) {
 
 func TestEncode(t *testing.T) {
 	type MyType struct {
-		Time         time.Time `influx:"time"`
-		TagValue     string    `influx:"tagValue,tag"`
-		IntValue     int       `influx:"intValue"`
-		FloatValue   float64   `influx:"floatValue"`
-		BoolValue    bool      `influx:"boolValue"`
-		StringValue  string    `influx:"stringValue"`
-		IgnoredValue string    `influx:"-"`
+		Time             time.Time `influx:"time"`
+		TagValue         string    `influx:"tagValue,tag"`
+		TagAndFieldValue string    `influx:"tagAndFieldValue,tag,field"`
+		IntValue         int       `influx:"intValue"`
+		FloatValue       float64   `influx:"floatValue"`
+		BoolValue        bool      `influx:"boolValue"`
+		StringValue      string    `influx:"stringValue"`
+		StructFieldName  string    `influx:""`
+		IgnoredValue     string    `influx:"-"`
 	}
 
 	d := MyType{
 		time.Now(),
 		"tag-value",
+		"tag-and-field-value",
 		10,
 		10.5,
 		true,
 		"string",
+		"struct-field",
 		"ignored",
 	}
 
 	timeExp := d.Time
 
 	tagsExp := map[string]string{
-		"tagValue": "tag-value",
+		"tagValue":         "tag-value",
+		"tagAndFieldValue": "tag-and-field-value",
 	}
 
 	fieldsExp := map[string]interface{}{
-		"intValue":    d.IntValue,
-		"floatValue":  d.FloatValue,
-		"boolValue":   d.BoolValue,
-		"stringValue": d.StringValue,
+		"tagAndFieldValue": d.TagAndFieldValue,
+		"intValue":         d.IntValue,
+		"floatValue":       d.FloatValue,
+		"boolValue":        d.BoolValue,
+		"stringValue":      d.StringValue,
+		"StructFieldName":  d.StructFieldName,
 	}
 
 	tm, tags, fields, err := encode(d)

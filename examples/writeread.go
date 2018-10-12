@@ -48,7 +48,7 @@ type envSample struct {
 type envSampleRead struct {
 	Time        time.Time `influx:"time"`
 	Location    string    `influx:"location,tag"`
-	City        string    `influx:"city,tag"`
+	City        string    `influx:"city,tag,field"`
 	Temperature float64   `influx:"temperature"`
 	Humidity    float64   `influx:"humidity"`
 	Cycles      float64   `influx:"cycles"`
