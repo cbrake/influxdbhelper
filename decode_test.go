@@ -88,10 +88,8 @@ func TestDecodeMissingColumn(t *testing.T) {
 	decoded := []DecodeType{}
 
 	err := decode(columns, values, &decoded)
-	if err == nil {
-		t.Error("Expected error decoding: ", err)
-	} else {
-		fmt.Println("Got expected error: ", err)
+	if err != nil {
+		t.Error("UnExpected error decoding: ", columns, values, &decoded)
 	}
 
 	if !reflect.DeepEqual(expected, decoded) {

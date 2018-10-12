@@ -72,8 +72,8 @@ func decode(columns []string, values [][]interface{}, result interface{}) error 
 				continue
 			}
 
-			tag = getInfluxFieldTagName(tag)
-			i, ok := colIndex[tag]
+			fieldData := getInfluxFieldTagData(f.String(), tag)
+			i, ok := colIndex[fieldData.fieldName]
 
 			if !ok {
 				continue
@@ -86,12 +86,12 @@ func decode(columns []string, values [][]interface{}, result interface{}) error 
 			if f.Type() == reflect.TypeOf(time.Time{}) {
 				timeS, ok := vIn[i].(string)
 				if !ok {
-					e := errors.New("Time input is not string")
+					e := errors.New("time input is not string")
 					errs = appendErrors(errs, e)
 				} else {
 					time, err := time.Parse(time.RFC3339, timeS)
 					if err != nil {
-						e := errors.New("Error parsing time")
+						e := errors.New("error parsing time")
 						errs = appendErrors(errs, e)
 					} else {
 						vIn[i] = time
