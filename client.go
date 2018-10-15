@@ -25,8 +25,11 @@ type Client interface {
 	// UseDB sets the DB to use for Query, WritePoint, and WritePointTagsFields
 	UseDB(db string) Client
 
-	// UseMeasurement sets the measurment to use for WritePoint, and WritePointTagsFields
+	// UseMeasurement sets the measurement to use for WritePoint, and WritePointTagsFields
 	UseMeasurement(measurement string) Client
+
+	// UseTimeField sets the time field to use for WritePoint, and WritePointTagsFields
+	UseTimeField(fieldName string) Client
 
 	// Query executes an InfluxDb query, and unpacks the result into the
 	// result data structure.
