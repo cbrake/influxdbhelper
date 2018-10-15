@@ -48,9 +48,14 @@ type helperClient struct {
 	using     *helperUsing
 }
 
+type usingValue struct {
+	value string
+	retain bool
+}
+
 type helperUsing struct {
-	db string
-	measurement string
+	db *usingValue
+	measurement *usingValue
 }
 
 // NewClient returns a new influxdbhelper influxClient given a url, user,
@@ -105,7 +110,7 @@ func (c *helperClient) UseDB(db string) Client {
 		c.using = &helperUsing{}
 	}
 
-	c.using.db = db
+	c.using.db = &usingValue{db, true}
 	return c
 }
 
@@ -115,7 +120,7 @@ func (c *helperClient) UseMeasurement(measurement string) Client {
 		c.using = &helperUsing{}
 	}
 
-	c.using.measurement = measurement
+	c.using.measurement = &usingValue{measurement, true}
 	return c
 }
 
@@ -132,19 +137,22 @@ func (c *helperClient) UseMeasurement(measurement string) Client {
 // The struct field tag can be set to '-' which indicates this field
 // should be ignored.
 func (c *helperClient) DecodeQuery(q string, result interface{}) (err error) {
-	if c.using == nil {
+	if c.using == nil || c.using.db == nil {
 		return fmt.Errorf("no db set for query")
 	}
 
 	query := influxClient.Query{
 		Command:   q,
-		Database:  c.using.db,
+		Database:  c.using.db.value,
 		Chunked:   false,
 		ChunkSize: 100,
 	}
 
 	var response *influxClient.Response
 	response, err = c.client.Query(query)
+	if !c.using.db.retain {
+		c.using.db = nil
+	}
 
 	if response.Error() != nil {
 		return response.Error()
@@ -173,14 +181,14 @@ func (c *helperClient) DecodeQuery(q string, result interface{}) (err error) {
 // the struct field should be ignored. A struct field of Time is required and
 // is used for the time of the sample.
 func (c *helperClient) WritePoint(data interface{}) error {
-	if c.using == nil {
+	if c.using == nil || c.using.db == nil {
 		return fmt.Errorf("no db set for query")
 	}
 
 	t, tags, fields, measurement, err := encode(data)
 
-	if c.using.measurement == "" {
-		c.using.measurement = measurement
+	if c.using.measurement == nil {
+		c.using.measurement = &usingValue{measurement, false}
 	}
 
 	if err != nil {
@@ -193,12 +201,16 @@ func (c *helperClient) WritePoint(data interface{}) error {
 
 // WritePointTagsFields is used to write a point specifying tags and fields.
 func (c *helperClient) WritePointTagsFields(tags map[string]string, fields map[string]interface{}, t time.Time) (err error) {
-	if c.using == nil {
+	if c.using == nil || c.using.db == nil {
 		return fmt.Errorf("no db set for query")
 	}
 
+	if c.using.measurement == nil {
+		return fmt.Errorf("no measurement set for query")
+	}
+
 	bp, err := influxClient.NewBatchPoints(influxClient.BatchPointsConfig{
-		Database:  c.using.db,
+		Database:  c.using.db.value,
 		Precision: c.precision,
 	})
 
@@ -206,7 +218,13 @@ func (c *helperClient) WritePointTagsFields(tags map[string]string, fields map[s
 		return err
 	}
 
-	pt, err := influxClient.NewPoint(c.using.measurement, tags, fields, t)
+	pt, err := influxClient.NewPoint(c.using.measurement.value, tags, fields, t)
+	if !c.using.db.retain {
+		c.using.db = nil
+	}
+	if !c.using.measurement.retain {
+		c.using.measurement = nil
+	}
 
 	if err != nil {
 		return err
