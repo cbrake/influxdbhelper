@@ -145,7 +145,6 @@ func (c *helperClient) DecodeQuery(q string, result interface{}) (err error) {
 
 	var response *influxClient.Response
 	response, err = c.client.Query(query)
-	c.using = nil
 
 	if response.Error() != nil {
 		return response.Error()
@@ -208,7 +207,6 @@ func (c *helperClient) WritePointTagsFields(tags map[string]string, fields map[s
 	}
 
 	pt, err := influxClient.NewPoint(c.using.measurement, tags, fields, t)
-	c.using = nil
 
 	if err != nil {
 		return err

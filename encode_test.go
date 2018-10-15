@@ -74,14 +74,14 @@ func TestEncode(t *testing.T) {
 		"StructFieldName":  d.StructFieldName,
 	}
 
-	tm, tags, fields, mesurement, err := encode(d)
+	tm, tags, fields, measurement, err := encode(d)
 
 	if err != nil {
 		t.Error("Error encoding: ", err)
 	}
 
-	if mesurement != d.InfluxMeasurement {
-		t.Errorf("%v != %v", mesurement, d.InfluxMeasurement)
+	if measurement != d.InfluxMeasurement {
+		t.Errorf("%v != %v", measurement, d.InfluxMeasurement)
 	}
 
 	if _, ok := fields["InfluxMeasurement"]; ok {
