@@ -56,6 +56,7 @@ type usingValue struct {
 type helperUsing struct {
 	db *usingValue
 	measurement *usingValue
+	timeField *usingValue
 }
 
 // NewClient returns a new influxdbhelper influxClient given a url, user,
@@ -124,6 +125,16 @@ func (c *helperClient) UseMeasurement(measurement string) Client {
 	return c
 }
 
+// UseDB sets the DB to use for Query, WritePoint, and WritePointTagsFields
+func (c *helperClient) UseTimeField(fieldName string) Client {
+	if c.using == nil {
+		c.using = &helperUsing{}
+	}
+
+	c.using.timeField = &usingValue{fieldName, true}
+	return c
+}
+
 
 // Query executes an InfluxDb query, and unpacks the result into the
 // result data structure.
@@ -185,7 +196,7 @@ func (c *helperClient) WritePoint(data interface{}) error {
 		return fmt.Errorf("no db set for query")
 	}
 
-	t, tags, fields, measurement, err := encode(data)
+	t, tags, fields, measurement, err := encode(data, c.using.timeField)
 
 	if c.using.measurement == nil {
 		c.using.measurement = &usingValue{measurement, false}
@@ -195,7 +206,7 @@ func (c *helperClient) WritePoint(data interface{}) error {
 		return err
 	}
 
-	return c.WritePointTagsFields( tags, fields, t)
+	return c.WritePointTagsFields(tags, fields, t)
 }
 
 
@@ -224,6 +235,9 @@ func (c *helperClient) WritePointTagsFields(tags map[string]string, fields map[s
 	}
 	if !c.using.measurement.retain {
 		c.using.measurement = nil
+	}
+	if !c.using.timeField.retain {
+		c.using.timeField = nil
 	}
 
 	if err != nil {

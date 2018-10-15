@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func encode(d interface{}) (t time.Time, tags map[string]string, fields map[string]interface{}, measurement string, err error) {
+func encode(d interface{}, timeField *usingValue) (t time.Time, tags map[string]string, fields map[string]interface{}, measurement string, err error) {
 	tags = make(map[string]string)
 	fields = make(map[string]interface{})
 	dValue := reflect.ValueOf(d)
@@ -19,6 +19,10 @@ func encode(d interface{}) (t time.Time, tags map[string]string, fields map[stri
 	if dValue.Kind() != reflect.Struct {
 		err = errors.New("data must be a struct")
 		return
+	}
+
+	if timeField == nil {
+		timeField = &usingValue{"time", false}
 	}
 
 	for i := 0; i < dValue.NumField(); i++ {
@@ -35,7 +39,7 @@ func encode(d interface{}) (t time.Time, tags map[string]string, fields map[stri
 			continue
 		}
 
-		if fieldData.fieldName == "time" {
+		if fieldData.fieldName == timeField.value {
 			// TODO error checking
 			t = f.Interface().(time.Time)
 			continue

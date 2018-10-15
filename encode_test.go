@@ -7,7 +7,7 @@ import (
 )
 
 func TestEncodeDataNotStruct(t *testing.T) {
-	_, _, _, _, err := encode([]int{1, 2, 3})
+	_, _, _, _, err := encode([]int{1, 2, 3}, nil)
 	if err == nil {
 		t.Error("Expected error")
 	}
@@ -19,16 +19,35 @@ func TestEncodeSetsMesurment(t *testing.T) {
 	}
 
 	d := &MyType{"test-data"}
-	_, _, _, mesurement, err := encode(d)
+	_, _, _, measurement, err := encode(d, nil)
 
 	if err != nil {
 		t.Error("Error encoding: ", err)
 	}
 
-	if mesurement != "MyType" {
-		t.Errorf("%v != %v", mesurement, "MyType")
+	if measurement != "MyType" {
+		t.Errorf("%v != %v", measurement, "MyType")
+	}
+}
+
+func TestEncodeUsesTimeField(t *testing.T) {
+	type MyType struct {
+		MyTimeField             time.Time `influx:"my_time_field"`
+		Val string `influx:"val"`
 	}
 
+	td, _ := time.Parse(time.RFC822, "27 Oct 78 15:04 PST")
+
+	d := &MyType{td,"test-data"}
+	tv, _, _, _, err := encode(d, &usingValue{"my_time_field", false})
+
+	if tv != td {
+		t.Error("Did not properly use the time field specified")
+	}
+
+	if err != nil {
+		t.Error("Error encoding: ", err)
+	}
 }
 
 func TestEncode(t *testing.T) {
@@ -74,7 +93,7 @@ func TestEncode(t *testing.T) {
 		"StructFieldName":  d.StructFieldName,
 	}
 
-	tm, tags, fields, measurement, err := encode(d)
+	tm, tags, fields, measurement, err := encode(d, nil)
 
 	if err != nil {
 		t.Error("Error encoding: ", err)
