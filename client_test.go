@@ -12,7 +12,7 @@ func ExampleClient_WritePoint() {
 		Location    string    `influx:"location,tag"`
 		Temperature float64   `influx:"temperature"`
 		Humidity    float64   `influx:"humidity"`
-		Id          string    `influx:"-"`
+		ID          string    `influx:"-"`
 	}
 
 	s := EnvSample{
@@ -20,10 +20,10 @@ func ExampleClient_WritePoint() {
 		Location:    "Rm 243",
 		Temperature: 70.0,
 		Humidity:    60.0,
-		Id:          "12432as32",
+		ID:          "12432as32",
 	}
 
-	c.WritePoint("myDb", "test", s)
+	c.UseDB("myDb").UseMeasurement("test").WritePoint(s)
 }
 
 func ExampleClient_Query() {
@@ -34,14 +34,14 @@ func ExampleClient_Query() {
 		Location    string    `influx:"location,tag"`
 		Temperature float64   `influx:"temperature"`
 		Humidity    float64   `influx:"humidity"`
-		Id          string    `influx:"-"`
+		ID          string    `influx:"-"`
 	}
 
 	samplesRead := []EnvSample{}
 
 	q := `SELECT * FROM test ORDER BY time DESC LIMIT 10`
 
-	c.Query("myDb", q, &samplesRead)
+	c.UseDB("myDb").DecodeQuery(q, &samplesRead)
 
 	// samplesRead is now populated with data from InfluxDb
 }

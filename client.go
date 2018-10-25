@@ -1,11 +1,12 @@
 package influxdbhelper
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 	"time"
 
-	client "github.com/influxdata/influxdb/client/v2"
+	influxClient "github.com/influxdata/influxdb/client/v2"
 )
 
 var reRemoveExtraSpace = regexp.MustCompile(`\s\s+`)
@@ -18,28 +19,68 @@ func CleanQuery(query string) string {
 	return ret
 }
 
-// A Client represents an influxdbhelper client connection to
+// A Client represents an influxdbhelper influxClient connection to
 // an InfluxDb server.
-type Client struct {
-	url       string
-	client    client.Client
-	precision string
+type Client interface {
+	influxClient.Client
+
+	// UseDB sets the DB to use for Query, WritePoint, and WritePointTagsFields.
+	// This field must be set before WritePoint... calls.
+	UseDB(db string) Client
+
+	// UseMeasurement sets the measurement to use for WritePoint, and WritePointTagsFields.
+	// If this is not set, a struct field with named InfluxMeasurement is required
+	// in the write data. The data passed in this call has priority over data fields in
+	// writes.
+	UseMeasurement(measurement string) Client
+
+	// UseTimeField sets the time field to use for WritePoint, and WritePointTagsFields. This
+	// call is optional, and a data struct field with a `influx:"time"` tag can also be used.
+	UseTimeField(fieldName string) Client
+
+	// Query executes an InfluxDb query, and unpacks the result into the
+	// result data structure.
+	DecodeQuery(query string, result interface{}) error
+
+	// WritePoint is used to write arbitrary data into InfluxDb.
+	WritePoint(data interface{}) error
+
+	// WritePointTagsFields is used to write a point specifying tags and fields.
+	WritePointTagsFields(tags map[string]string, fields map[string]interface{}, t time.Time) error
 }
 
-// NewClient returns a new influxdbhelper client given a url, user,
+type helperClient struct {
+	url       string
+	client    influxClient.Client
+	precision string
+	using     *helperUsing
+}
+
+type usingValue struct {
+	value  string
+	retain bool
+}
+
+type helperUsing struct {
+	db          *usingValue
+	measurement *usingValue
+	timeField   *usingValue
+}
+
+// NewClient returns a new influxdbhelper influxClient given a url, user,
 // password, and precision strings.
 //
 // url is typically something like: http://localhost:8086
 //
 // precision can be ‘h’, ‘m’, ‘s’, ‘ms’, ‘u’, or ‘ns’ and is
 // used during write operations.
-func NewClient(url, user, passwd, precision string) (*Client, error) {
-	ret := Client{
+func NewClient(url, user, passwd, precision string) (Client, error) {
+	ret := &helperClient{
 		url:       url,
 		precision: precision,
 	}
 
-	client, err := client.NewHTTPClient(client.HTTPConfig{
+	client, err := influxClient.NewHTTPClient(influxClient.HTTPConfig{
 		Addr:     url,
 		Username: user,
 		Password: passwd,
@@ -47,13 +88,59 @@ func NewClient(url, user, passwd, precision string) (*Client, error) {
 
 	ret.client = client
 
-	return &ret, err
+	return ret, err
 }
 
-// InfluxClient returns the influxdb/client/v2 client if low level
-// queries or writes need to be executed.
-func (c Client) InfluxClient() client.Client {
-	return c.client
+// Ping checks that status of cluster, and will always return 0 time and no
+// error for UDP clients.
+func (c *helperClient) Ping(timeout time.Duration) (time.Duration, string, error) {
+	return c.client.Ping(timeout)
+}
+
+// Write takes a BatchPoints object and writes all Points to InfluxDB.
+func (c *helperClient) Write(bp influxClient.BatchPoints) error {
+	return c.client.Write(bp)
+}
+
+// Query makes an InfluxDB Query on the database. This will fail if using
+// the UDP client.
+func (c *helperClient) Query(q influxClient.Query) (*influxClient.Response, error) {
+	return c.client.Query(q)
+}
+
+// Close releases any resources a Client may be using.
+func (c *helperClient) Close() error {
+	return c.client.Close()
+}
+
+// UseDB sets the DB to use for Query, WritePoint, and WritePointTagsFields
+func (c *helperClient) UseDB(db string) Client {
+	if c.using == nil {
+		c.using = &helperUsing{}
+	}
+
+	c.using.db = &usingValue{db, true}
+	return c
+}
+
+// UseMeasurement sets the DB to use for Query, WritePoint, and WritePointTagsFields
+func (c *helperClient) UseMeasurement(measurement string) Client {
+	if c.using == nil {
+		c.using = &helperUsing{}
+	}
+
+	c.using.measurement = &usingValue{measurement, true}
+	return c
+}
+
+// UseDB sets the DB to use for Query, WritePoint, and WritePointTagsFields
+func (c *helperClient) UseTimeField(fieldName string) Client {
+	if c.using == nil {
+		c.using = &helperUsing{}
+	}
+
+	c.using.timeField = &usingValue{fieldName, true}
+	return c
 }
 
 // Query executes an InfluxDb query, and unpacks the result into the
@@ -67,16 +154,23 @@ func (c Client) InfluxClient() client.Client {
 // and InfluxDb field/tag names typically start with a lower case letter.
 // The struct field tag can be set to '-' which indicates this field
 // should be ignored.
-func (c Client) Query(db, cmd string, result interface{}) (err error) {
-	query := client.Query{
-		Command:   cmd,
-		Database:  db,
+func (c *helperClient) DecodeQuery(q string, result interface{}) (err error) {
+	if c.using == nil || c.using.db == nil {
+		return fmt.Errorf("no db set for query")
+	}
+
+	query := influxClient.Query{
+		Command:   q,
+		Database:  c.using.db.value,
 		Chunked:   false,
 		ChunkSize: 100,
 	}
 
-	var response *client.Response
+	var response *influxClient.Response
 	response, err = c.client.Query(query)
+	if !c.using.db.retain {
+		c.using.db = nil
+	}
 
 	if response.Error() != nil {
 		return response.Error()
@@ -92,8 +186,7 @@ func (c Client) Query(db, cmd string, result interface{}) (err error) {
 	}
 
 	series := results[0].Series[0]
-
-	err = decode(series.Columns, series.Values, result)
+	err = decode(series, result)
 
 	return
 }
@@ -105,20 +198,36 @@ func (c Client) Query(db, cmd string, result interface{}) (err error) {
 // struct field should be an InfluxDb tag (vs field). A tag of '-' indicates
 // the struct field should be ignored. A struct field of Time is required and
 // is used for the time of the sample.
-func (c Client) WritePoint(db, measurement string, data interface{}) error {
-	t, tags, fields, err := encode(data)
+func (c *helperClient) WritePoint(data interface{}) error {
+	if c.using == nil || c.using.db == nil {
+		return fmt.Errorf("no db set for query")
+	}
+
+	t, tags, fields, measurement, err := encode(data, c.using.timeField)
+
+	if c.using.measurement == nil {
+		c.using.measurement = &usingValue{measurement, false}
+	}
 
 	if err != nil {
 		return err
 	}
 
-	return c.WritePointTagsFields(db, measurement, tags, fields, t)
+	return c.WritePointTagsFields(tags, fields, t)
 }
 
 // WritePointTagsFields is used to write a point specifying tags and fields.
-func (c Client) WritePointTagsFields(db, measurement string, tags map[string]string, fields map[string]interface{}, t time.Time) error {
-	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
-		Database:  db,
+func (c *helperClient) WritePointTagsFields(tags map[string]string, fields map[string]interface{}, t time.Time) (err error) {
+	if c.using == nil || c.using.db == nil {
+		return fmt.Errorf("no db set for query")
+	}
+
+	if c.using.measurement == nil {
+		return fmt.Errorf("no measurement set for query")
+	}
+
+	bp, err := influxClient.NewBatchPoints(influxClient.BatchPointsConfig{
+		Database:  c.using.db.value,
 		Precision: c.precision,
 	})
 
@@ -126,7 +235,16 @@ func (c Client) WritePointTagsFields(db, measurement string, tags map[string]str
 		return err
 	}
 
-	pt, err := client.NewPoint(measurement, tags, fields, t)
+	pt, err := influxClient.NewPoint(c.using.measurement.value, tags, fields, t)
+	if !c.using.db.retain {
+		c.using.db = nil
+	}
+	if !c.using.measurement.retain {
+		c.using.measurement = nil
+	}
+	if c.using.timeField != nil && !c.using.timeField.retain {
+		c.using.timeField = nil
+	}
 
 	if err != nil {
 		return err

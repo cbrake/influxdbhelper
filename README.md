@@ -23,14 +23,14 @@ const (
 	db        = "dbhelper"
 )
 
-var c *influxdbhelper.Client
+var c influxdbhelper.Client
 
 func Init() (err error) {
 	c, err = influxdbhelper.NewClient(influxUrl, "", "", "ns")
 	if err != nil {
 		return
 	}
-	// Create MM database if it doesn't already exist
+	// Create database if it doesn't already exist
 	q := client.NewQuery("CREATE DATABASE "+db, "", "")
 	res, err := c.InfluxClient().Query(q)
 	if err != nil {
@@ -44,6 +44,7 @@ func Init() (err error) {
 }
 
 type EnvSample struct {
+	InfluxMeasurement      influxdbhelper.Measurement
 	Time        time.Time `influx:"time"`
 	Location    string    `influx:"location,tag"`
 	Temperature float64   `influx:"temperature"`
@@ -56,6 +57,7 @@ func generateSampleData() []EnvSample {
 
 	for i, _ := range ret {
 		ret[i] = EnvSample{
+			InfluxMeasurement: "test"
 			Time:        time.Now(),
 			Location:    "Rm 243",
 			Temperature: 70 + float64(i),
@@ -75,8 +77,9 @@ func main() {
 
 	// write sample data to database
 	samples := generateSampleData()
+	c = c.UseDB(db)
 	for _, p := range samples {
-		err := c.WritePoint(db, "test", p)
+		err := c.WritePoint(p)
 		if err != nil {
 			log.Fatal("Error writing point: ", err)
 		}
@@ -86,7 +89,7 @@ func main() {
 	samplesRead := []EnvSample{}
 
 	q := `SELECT * FROM test ORDER BY time DESC LIMIT 10`
-	err = c.Query(db, q, &samplesRead)
+	err = c.UseDB(db).Query(q, &samplesRead)
 	if err != nil {
 		log.Fatal("Query error: ", err)
 	}
@@ -134,14 +137,14 @@ libraries that do similiar things, I would be very interested in learning about 
 
 Todo:
 
-* [x] handle larger query datasets (multiple series, etc)
-* [x] add write capability (directly write Go structs into influxdb)
-* [x] add godoc documentation
-* [ ] decode/encode val0, val1, val2 fields in influx to Go array
-* [ ] use Go struct field tags to help build SELECT statement
-* [ ] optimize query for performace (pre-allocate slices, etc)
-* [ ] come up with a better name (indecode, etc)
-* [ ] finish error checking
+- [x] handle larger query datasets (multiple series, etc)
+- [x] add write capability (directly write Go structs into influxdb)
+- [x] add godoc documentation
+- [ ] decode/encode val0, val1, val2 fields in influx to Go array
+- [ ] use Go struct field tags to help build SELECT statement
+- [ ] optimize query for performace (pre-allocate slices, etc)
+- [ ] come up with a better name (indecode, etc)
+- [ ] finish error checking
 
 Review/Pull requests welcome!
 

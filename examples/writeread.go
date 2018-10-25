@@ -14,7 +14,7 @@ const (
 	db        = "dbhelper"
 )
 
-var c *influxdbhelper.Client
+var c influxdbhelper.Client
 
 // Init initializes the database connection
 func Init() (err error) {
@@ -22,9 +22,9 @@ func Init() (err error) {
 	if err != nil {
 		return
 	}
-	// Create MM database if it doesn't already exist
+	// Create test database if it doesn't already exist
 	q := client.NewQuery("CREATE DATABASE "+db, "", "")
-	res, err := c.InfluxClient().Query(q)
+	res, err := c.Query(q)
 	if err != nil {
 		return err
 	}
@@ -36,23 +36,25 @@ func Init() (err error) {
 }
 
 type envSample struct {
-	Time        time.Time `influx:"time"`
-	Location    string    `influx:"location,tag"`
-	Temperature float64   `influx:"temperature"`
-	Humidity    float64   `influx:"humidity"`
-	ID          string    `influx:"-"`
+	InfluxMeasurement influxdbhelper.Measurement
+	Time              time.Time `influx:"time"`
+	Location          string    `influx:"location,tag"`
+	Temperature       float64   `influx:"temperature"`
+	Humidity          float64   `influx:"humidity"`
+	ID                string    `influx:"-"`
 }
 
 // we populate a few more fields when reading back
 // date to verify unused fields are handled correctly
 type envSampleRead struct {
-	Time        time.Time `influx:"time"`
-	Location    string    `influx:"location,tag"`
-	City        string    `influx:"city,tag"`
-	Temperature float64   `influx:"temperature"`
-	Humidity    float64   `influx:"humidity"`
-	Cycles      float64   `influx:"cycles"`
-	ID          string    `influx:"-"`
+	InfluxMeasurement influxdbhelper.Measurement
+	Time              time.Time `influx:"time"`
+	Location          string    `influx:"location,tag"`
+	City              string    `influx:"city,tag,field"`
+	Temperature       float64   `influx:"temperature"`
+	Humidity          float64   `influx:"humidity"`
+	Cycles            float64   `influx:"cycles"`
+	ID                string    `influx:"-"`
 }
 
 func generateSampleData() []envSample {
@@ -60,11 +62,12 @@ func generateSampleData() []envSample {
 
 	for i := range ret {
 		ret[i] = envSample{
-			Time:        time.Now(),
-			Location:    "Rm 243",
-			Temperature: 70 + float64(i),
-			Humidity:    60 - float64(i),
-			ID:          "12432as32",
+			InfluxMeasurement: "test",
+			Time:              time.Now(),
+			Location:          "Rm 243",
+			Temperature:       70 + float64(i),
+			Humidity:          60 - float64(i),
+			ID:                "12432as32",
 		}
 	}
 
@@ -79,8 +82,9 @@ func main() {
 
 	// write sample data to database
 	samples := generateSampleData()
+	c = c.UseDB(db)
 	for _, p := range samples {
-		err := c.WritePoint(db, "test", p)
+		err := c.WritePoint(p)
 		if err != nil {
 			log.Fatal("Error writing point: ", err)
 		}
@@ -90,7 +94,7 @@ func main() {
 	samplesRead := []envSampleRead{}
 
 	q := `SELECT * FROM test ORDER BY time DESC LIMIT 10`
-	err = c.Query(db, q, &samplesRead)
+	err = c.UseDB(db).DecodeQuery(q, &samplesRead)
 	if err != nil {
 		log.Fatal("Query error: ", err)
 	}

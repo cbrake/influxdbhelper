@@ -1,27 +1,38 @@
 package influxdbhelper
 
-import "strings"
+import (
+	"strings"
+)
 
-func isInfluxTag(structTag string) bool {
+// Measurement is a type that defines the influx db measurement.
+type Measurement = string
+
+type influxFieldTagData struct {
+	fieldName string
+	isTag     bool
+	isField   bool
+}
+
+func getInfluxFieldTagData(fieldName, structTag string) (fieldData *influxFieldTagData) {
+	fieldData = &influxFieldTagData{fieldName: fieldName}
 	parts := strings.Split(structTag, ",")
+	fieldName, parts = parts[0], parts[1:]
+	if fieldName != "" {
+		fieldData.fieldName = fieldName
+	}
 
 	for _, part := range parts {
 		if part == "tag" {
-			return true
+			fieldData.isTag = true
+		}
+		if part == "field" {
+			fieldData.isField = true
 		}
 	}
 
-	return false
-}
-
-func getInfluxFieldTagName(structTag string) string {
-	parts := strings.Split(structTag, ",")
-
-	for _, part := range parts {
-		if part != "tag" {
-			return part
-		}
+	if !fieldData.isField && !fieldData.isTag {
+		fieldData.isField = true
 	}
 
-	return ""
+	return
 }
