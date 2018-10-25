@@ -24,13 +24,18 @@ func CleanQuery(query string) string {
 type Client interface {
 	influxClient.Client
 
-	// UseDB sets the DB to use for Query, WritePoint, and WritePointTagsFields
+	// UseDB sets the DB to use for Query, WritePoint, and WritePointTagsFields.
+	// This field must be set before WritePoint... calls.
 	UseDB(db string) Client
 
-	// UseMeasurement sets the measurement to use for WritePoint, and WritePointTagsFields
+	// UseMeasurement sets the measurement to use for WritePoint, and WritePointTagsFields.
+	// If this is not set, a struct field with named InfluxMeasurement is required
+	// in the write data. The data passed in this call has priority over data fields in
+	// writes.
 	UseMeasurement(measurement string) Client
 
-	// UseTimeField sets the time field to use for WritePoint, and WritePointTagsFields
+	// UseTimeField sets the time field to use for WritePoint, and WritePointTagsFields. This
+	// call is optional, and a data struct field with a `influx:"time"` tag can also be used.
 	UseTimeField(fieldName string) Client
 
 	// Query executes an InfluxDb query, and unpacks the result into the
