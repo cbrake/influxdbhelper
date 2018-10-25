@@ -22,7 +22,7 @@ func Init() (err error) {
 	if err != nil {
 		return
 	}
-	// Create MM database if it doesn't already exist
+	// Create test database if it doesn't already exist
 	q := client.NewQuery("CREATE DATABASE "+db, "", "")
 	res, err := c.Query(q)
 	if err != nil {
@@ -36,25 +36,25 @@ func Init() (err error) {
 }
 
 type envSample struct {
-	InfluxMeasurement      influxdbhelper.Measurement
-	Time        time.Time `influx:"time"`
-	Location    string    `influx:"location,tag"`
-	Temperature float64   `influx:"temperature"`
-	Humidity    float64   `influx:"humidity"`
-	ID          string    `influx:"-"`
+	InfluxMeasurement influxdbhelper.Measurement
+	Time              time.Time `influx:"time"`
+	Location          string    `influx:"location,tag"`
+	Temperature       float64   `influx:"temperature"`
+	Humidity          float64   `influx:"humidity"`
+	ID                string    `influx:"-"`
 }
 
 // we populate a few more fields when reading back
 // date to verify unused fields are handled correctly
 type envSampleRead struct {
-	InfluxMeasurement      influxdbhelper.Measurement
-	Time        time.Time `influx:"time"`
-	Location    string    `influx:"location,tag"`
-	City        string    `influx:"city,tag,field"`
-	Temperature float64   `influx:"temperature"`
-	Humidity    float64   `influx:"humidity"`
-	Cycles      float64   `influx:"cycles"`
-	ID          string    `influx:"-"`
+	InfluxMeasurement influxdbhelper.Measurement
+	Time              time.Time `influx:"time"`
+	Location          string    `influx:"location,tag"`
+	City              string    `influx:"city,tag,field"`
+	Temperature       float64   `influx:"temperature"`
+	Humidity          float64   `influx:"humidity"`
+	Cycles            float64   `influx:"cycles"`
+	ID                string    `influx:"-"`
 }
 
 func generateSampleData() []envSample {
@@ -63,11 +63,11 @@ func generateSampleData() []envSample {
 	for i := range ret {
 		ret[i] = envSample{
 			InfluxMeasurement: "test",
-			Time:        time.Now(),
-			Location:    "Rm 243",
-			Temperature: 70 + float64(i),
-			Humidity:    60 - float64(i),
-			ID:          "12432as32",
+			Time:              time.Now(),
+			Location:          "Rm 243",
+			Temperature:       70 + float64(i),
+			Humidity:          60 - float64(i),
+			ID:                "12432as32",
 		}
 	}
 

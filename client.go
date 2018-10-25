@@ -19,6 +19,8 @@ func CleanQuery(query string) string {
 	return ret
 }
 
+// A Client represents an influxdbhelper influxClient connection to
+// an InfluxDb server.
 type Client interface {
 	influxClient.Client
 
@@ -42,8 +44,6 @@ type Client interface {
 	WritePointTagsFields(tags map[string]string, fields map[string]interface{}, t time.Time) error
 }
 
-// A Client represents an influxdbhelper influxClient connection to
-// an InfluxDb server.
 type helperClient struct {
 	url       string
 	client    influxClient.Client
@@ -52,14 +52,14 @@ type helperClient struct {
 }
 
 type usingValue struct {
-	value string
+	value  string
 	retain bool
 }
 
 type helperUsing struct {
-	db *usingValue
+	db          *usingValue
 	measurement *usingValue
-	timeField *usingValue
+	timeField   *usingValue
 }
 
 // NewClient returns a new influxdbhelper influxClient given a url, user,
@@ -138,7 +138,6 @@ func (c *helperClient) UseTimeField(fieldName string) Client {
 	return c
 }
 
-
 // Query executes an InfluxDb query, and unpacks the result into the
 // result data structure.
 //
@@ -211,7 +210,6 @@ func (c *helperClient) WritePoint(data interface{}) error {
 
 	return c.WritePointTagsFields(tags, fields, t)
 }
-
 
 // WritePointTagsFields is used to write a point specifying tags and fields.
 func (c *helperClient) WritePointTagsFields(tags map[string]string, fields map[string]interface{}, t time.Time) (err error) {

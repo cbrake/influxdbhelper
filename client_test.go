@@ -12,7 +12,7 @@ func ExampleClient_WritePoint() {
 		Location    string    `influx:"location,tag"`
 		Temperature float64   `influx:"temperature"`
 		Humidity    float64   `influx:"humidity"`
-		Id          string    `influx:"-"`
+		ID          string    `influx:"-"`
 	}
 
 	s := EnvSample{
@@ -20,7 +20,7 @@ func ExampleClient_WritePoint() {
 		Location:    "Rm 243",
 		Temperature: 70.0,
 		Humidity:    60.0,
-		Id:          "12432as32",
+		ID:          "12432as32",
 	}
 
 	c.UseDB("myDb").UseMeasurement("test").WritePoint(s)
@@ -34,7 +34,7 @@ func ExampleClient_Query() {
 		Location    string    `influx:"location,tag"`
 		Temperature float64   `influx:"temperature"`
 		Humidity    float64   `influx:"humidity"`
-		Id          string    `influx:"-"`
+		ID          string    `influx:"-"`
 	}
 
 	samplesRead := []EnvSample{}
