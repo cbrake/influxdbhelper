@@ -30,7 +30,7 @@ func Init() (err error) {
 	if err != nil {
 		return
 	}
-	// Create MM database if it doesn't already exist
+	// Create database if it doesn't already exist
 	q := client.NewQuery("CREATE DATABASE "+db, "", "")
 	res, err := c.InfluxClient().Query(q)
 	if err != nil {
@@ -137,14 +137,14 @@ libraries that do similiar things, I would be very interested in learning about 
 
 Todo:
 
-* [x] handle larger query datasets (multiple series, etc)
-* [x] add write capability (directly write Go structs into influxdb)
-* [x] add godoc documentation
-* [ ] decode/encode val0, val1, val2 fields in influx to Go array
-* [ ] use Go struct field tags to help build SELECT statement
-* [ ] optimize query for performace (pre-allocate slices, etc)
-* [ ] come up with a better name (indecode, etc)
-* [ ] finish error checking
+- [x] handle larger query datasets (multiple series, etc)
+- [x] add write capability (directly write Go structs into influxdb)
+- [x] add godoc documentation
+- [ ] decode/encode val0, val1, val2 fields in influx to Go array
+- [ ] use Go struct field tags to help build SELECT statement
+- [ ] optimize query for performace (pre-allocate slices, etc)
+- [ ] come up with a better name (indecode, etc)
+- [ ] finish error checking
 
 Review/Pull requests welcome!
 
