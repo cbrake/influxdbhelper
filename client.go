@@ -237,7 +237,7 @@ func (c *helperClient) WritePointTagsFields(tags map[string]string, fields map[s
 	if !c.using.measurement.retain {
 		c.using.measurement = nil
 	}
-	if !c.using.timeField.retain {
+	if c.using.timeField != nil && !c.using.timeField.retain {
 		c.using.timeField = nil
 	}
 
