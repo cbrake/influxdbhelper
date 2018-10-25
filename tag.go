@@ -4,6 +4,7 @@ import (
 	"strings"
 )
 
+// Measurement is a type that defines the influx db measurement.
 type Measurement = string
 
 type influxFieldTagData struct {

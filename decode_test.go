@@ -21,7 +21,7 @@ func TestDecode(t *testing.T) {
 			"stringValue",
 		},
 		Values: make([][]interface{}, 0),
-		Tags: map[string]string{"tagValue": "tag-value"},
+		Tags:   map[string]string{"tagValue": "tag-value"},
 	}
 
 	type DecodeType struct {
@@ -76,7 +76,7 @@ func TestDecodeMissingColumn(t *testing.T) {
 			"val1",
 		},
 		Values: make([][]interface{}, 0),
-		Tags: map[string]string{},
+		Tags:   map[string]string{},
 	}
 
 	type DecodeType struct {
@@ -106,7 +106,7 @@ func TestDecodeWrongType(t *testing.T) {
 			"val2",
 		},
 		Values: make([][]interface{}, 0),
-		Tags: map[string]string{},
+		Tags:   map[string]string{},
 	}
 
 	type DecodeType struct {
@@ -127,7 +127,6 @@ func TestDecodeWrongType(t *testing.T) {
 	}
 }
 
-
 func TestDecodeTime(t *testing.T) {
 	data := influxModels.Row{
 		Name: "bla",
@@ -136,7 +135,7 @@ func TestDecodeTime(t *testing.T) {
 			"value",
 		},
 		Values: make([][]interface{}, 0),
-		Tags: map[string]string{},
+		Tags:   map[string]string{},
 	}
 
 	type DecodeType struct {
@@ -172,7 +171,7 @@ func TestDecodeJsonNumber(t *testing.T) {
 			"val2",
 		},
 		Values: make([][]interface{}, 0),
-		Tags: map[string]string{},
+		Tags:   map[string]string{},
 	}
 
 	type DecodeType struct {
@@ -202,7 +201,7 @@ func TestDecodeUnsedStructValue(t *testing.T) {
 			"val2",
 		},
 		Values: make([][]interface{}, 0),
-		Tags: map[string]string{},
+		Tags:   map[string]string{},
 	}
 
 	type DecodeType struct {
@@ -232,13 +231,13 @@ func TestDecodeMeasure(t *testing.T) {
 			"val2",
 		},
 		Values: make([][]interface{}, 0),
-		Tags: map[string]string{},
+		Tags:   map[string]string{},
 	}
 
 	type DecodeType struct {
 		InfluxMeasurement Measurement
-		Val1 int     `influx:"val1"`
-		Val2 float64 `influx:"-"`
+		Val1              int     `influx:"val1"`
+		Val2              float64 `influx:"-"`
 	}
 
 	expected := []DecodeType{{"bla", 1, 0}}
