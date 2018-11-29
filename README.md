@@ -17,22 +17,33 @@ go get github.com/cbrake/influxdbhelper
 ## Example
 
 ```go
+package main
+
+import (
+	"log"
+	"time"
+
+	"github.com/cbrake/influxdbhelper"
+	client "github.com/influxdata/influxdb/client/v2"
+)
+
 const (
 	// Static connection configuration
-	influxUrl = "http://localhost:8086"
+	influxURL = "http://localhost:8086"
 	db        = "dbhelper"
 )
 
 var c influxdbhelper.Client
 
+// Init initializes the database connection
 func Init() (err error) {
-	c, err = influxdbhelper.NewClient(influxUrl, "", "", "ns")
+	c, err = influxdbhelper.NewClient(influxURL, "", "", "ns")
 	if err != nil {
 		return
 	}
-	// Create database if it doesn't already exist
+	// Create test database if it doesn't already exist
 	q := client.NewQuery("CREATE DATABASE "+db, "", "")
-	res, err := c.InfluxClient().Query(q)
+	res, err := c.Query(q)
 	if err != nil {
 		return err
 	}
@@ -43,26 +54,39 @@ func Init() (err error) {
 	return nil
 }
 
-type EnvSample struct {
-	InfluxMeasurement      influxdbhelper.Measurement
-	Time        time.Time `influx:"time"`
-	Location    string    `influx:"location,tag"`
-	Temperature float64   `influx:"temperature"`
-	Humidity    float64   `influx:"humidity"`
-	Id          string    `influx:"-"`
+type envSample struct {
+	InfluxMeasurement influxdbhelper.Measurement
+	Time              time.Time `influx:"time"`
+	Location          string    `influx:"location,tag"`
+	Temperature       float64   `influx:"temperature"`
+	Humidity          float64   `influx:"humidity"`
+	ID                string    `influx:"-"`
 }
 
-func generateSampleData() []EnvSample {
-	ret := make([]EnvSample, 10)
+// we populate a few more fields when reading back
+// date to verify unused fields are handled correctly
+type envSampleRead struct {
+	InfluxMeasurement influxdbhelper.Measurement
+	Time              time.Time `influx:"time"`
+	Location          string    `influx:"location,tag"`
+	City              string    `influx:"city,tag,field"`
+	Temperature       float64   `influx:"temperature"`
+	Humidity          float64   `influx:"humidity"`
+	Cycles            float64   `influx:"cycles"`
+	ID                string    `influx:"-"`
+}
 
-	for i, _ := range ret {
-		ret[i] = EnvSample{
-			InfluxMeasurement: "test"
-			Time:        time.Now(),
-			Location:    "Rm 243",
-			Temperature: 70 + float64(i),
-			Humidity:    60 - float64(i),
-			Id:          "12432as32",
+func generateSampleData() []envSample {
+	ret := make([]envSample, 10)
+
+	for i := range ret {
+		ret[i] = envSample{
+			InfluxMeasurement: "test",
+			Time:              time.Now(),
+			Location:          "Rm 243",
+			Temperature:       70 + float64(i),
+			Humidity:          60 - float64(i),
+			ID:                "12432as32",
 		}
 	}
 
@@ -86,10 +110,10 @@ func main() {
 	}
 
 	// query data from db
-	samplesRead := []EnvSample{}
+	samplesRead := []envSampleRead{}
 
 	q := `SELECT * FROM test ORDER BY time DESC LIMIT 10`
-	err = c.UseDB(db).Query(q, &samplesRead)
+	err = c.UseDB(db).DecodeQuery(q, &samplesRead)
 	if err != nil {
 		log.Fatal("Query error: ", err)
 	}
@@ -130,10 +154,6 @@ library provided a very useful reference for learning how to
 use the Go reflect functionality.
 
 ## Status
-
-This library is currently in the proof of concept phase, and the code is not
-optimized for performance, nor is it very clean at this point. If there are other
-libraries that do similiar things, I would be very interested in learning about them.
 
 Todo:
 
