@@ -32,13 +32,13 @@ func TestEncodeSetsMesurment(t *testing.T) {
 
 func TestEncodeUsesTimeField(t *testing.T) {
 	type MyType struct {
-		MyTimeField             time.Time `influx:"my_time_field"`
-		Val string `influx:"val"`
+		MyTimeField time.Time `influx:"my_time_field"`
+		Val         string    `influx:"val"`
 	}
 
 	td, _ := time.Parse(time.RFC822, "27 Oct 78 15:04 PST")
 
-	d := &MyType{td,"test-data"}
+	d := &MyType{td, "test-data"}
 	tv, _, _, _, err := encode(d, &usingValue{"my_time_field", false})
 
 	if tv != td {
@@ -52,16 +52,16 @@ func TestEncodeUsesTimeField(t *testing.T) {
 
 func TestEncode(t *testing.T) {
 	type MyType struct {
-		InfluxMeasurement      Measurement
-		Time             time.Time `influx:"time"`
-		TagValue         string    `influx:"tagValue,tag"`
-		TagAndFieldValue string    `influx:"tagAndFieldValue,tag,field"`
-		IntValue         int       `influx:"intValue"`
-		FloatValue       float64   `influx:"floatValue"`
-		BoolValue        bool      `influx:"boolValue"`
-		StringValue      string    `influx:"stringValue"`
-		StructFieldName  string    `influx:""`
-		IgnoredValue     string    `influx:"-"`
+		InfluxMeasurement Measurement
+		Time              time.Time `influx:"time"`
+		TagValue          string    `influx:"tagValue,tag"`
+		TagAndFieldValue  string    `influx:"tagAndFieldValue,tag,field"`
+		IntValue          int       `influx:"intValue"`
+		FloatValue        float64   `influx:"floatValue"`
+		BoolValue         bool      `influx:"boolValue"`
+		StringValue       string    `influx:"stringValue"`
+		StructFieldName   string    `influx:""`
+		IgnoredValue      string    `influx:"-"`
 	}
 
 	d := MyType{

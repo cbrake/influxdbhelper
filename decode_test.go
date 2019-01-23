@@ -59,7 +59,7 @@ func TestDecode(t *testing.T) {
 
 	decoded := []DecodeType{}
 
-	err := decode(data, &decoded)
+	err := decode([]influxModels.Row{data}, &decoded)
 	if err != nil {
 		t.Error("Error decoding: ", err)
 	}
@@ -87,7 +87,7 @@ func TestDecodeMissingColumn(t *testing.T) {
 	expected := []DecodeType{{1, 0}}
 	data.Values = append(data.Values, []interface{}{1})
 	decoded := []DecodeType{}
-	err := decode(data, &decoded)
+	err := decode([]influxModels.Row{data}, &decoded)
 
 	if err != nil {
 		t.Error("UnExpected error decoding: ", data, &decoded)
@@ -117,7 +117,7 @@ func TestDecodeWrongType(t *testing.T) {
 	expected := []DecodeType{{1, 2.0}}
 	data.Values = append(data.Values, []interface{}{1.0, 2})
 	decoded := []DecodeType{}
-	err := decode(data, &decoded)
+	err := decode([]influxModels.Row{data}, &decoded)
 	if err != nil {
 		t.Error("Unexpected error decoding: ", err, data, decoded)
 	}
@@ -152,7 +152,7 @@ func TestDecodeTime(t *testing.T) {
 	expected := []DecodeType{{ti, 2.0}}
 	data.Values = append(data.Values, []interface{}{timeS, 2.0})
 	decoded := []DecodeType{}
-	err = decode(data, &decoded)
+	err = decode([]influxModels.Row{data}, &decoded)
 
 	if err != nil {
 		t.Error("Error decoding: ", err)
@@ -182,7 +182,7 @@ func TestDecodeJsonNumber(t *testing.T) {
 	expected := []DecodeType{{1, 2.0}}
 	data.Values = append(data.Values, []interface{}{json.Number("1"), json.Number("2.0")})
 	decoded := []DecodeType{}
-	err := decode(data, &decoded)
+	err := decode([]influxModels.Row{data}, &decoded)
 
 	if err != nil {
 		t.Error("Error decoding: ", err)
@@ -212,7 +212,7 @@ func TestDecodeUnsedStructValue(t *testing.T) {
 	expected := []DecodeType{{1, 0}}
 	data.Values = append(data.Values, []interface{}{1, 1.1})
 	decoded := []DecodeType{}
-	err := decode(data, &decoded)
+	err := decode([]influxModels.Row{data}, &decoded)
 
 	if err != nil {
 		t.Error("Error decoding: ", err)
@@ -243,7 +243,7 @@ func TestDecodeMeasure(t *testing.T) {
 	expected := []DecodeType{{"bla", 1, 0}}
 	data.Values = append(data.Values, []interface{}{1, 1.1})
 	decoded := []DecodeType{}
-	err := decode(data, &decoded)
+	err := decode([]influxModels.Row{data}, &decoded)
 
 	if decoded[0].InfluxMeasurement != expected[0].InfluxMeasurement {
 		t.Error("Decoded Wrong measure")
