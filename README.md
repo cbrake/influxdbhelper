@@ -14,6 +14,9 @@ go get github.com/influxdata/influxdb/client/v2
 go get github.com/cbrake/influxdbhelper
 ```
 
+Note, this library currently does not work with the 1.7.x version of the InfluxDB client. It has
+been tested with 1.6.5.
+
 ## Example
 
 ```go
@@ -157,14 +160,16 @@ use the Go reflect functionality.
 
 Todo:
 
-- [x] handle larger query datasets (multiple series, etc)
-- [x] add write capability (directly write Go structs into influxdb)
-- [x] add godoc documentation
-- [ ] decode/encode val0, val1, val2 fields in influx to Go array
-- [ ] use Go struct field tags to help build SELECT statement
-- [ ] optimize query for performace (pre-allocate slices, etc)
-- [ ] come up with a better name (indecode, etc)
-- [ ] finish error checking
+* [x] handle larger query datasets (multiple series, etc)
+* [x] add write capability (directly write Go structs into influxdb)
+* [x] add godoc documentation
+* [ ] get working with influxdb 1.7 client
+* [ ] see if still applicable for influxdb 2.x
+* [ ] decode/encode val0, val1, val2 fields in influx to Go array
+* [ ] use Go struct field tags to help build SELECT statement
+* [ ] optimize query for performace (pre-allocate slices, etc)
+* [ ] come up with a better name (indecode, etc)
+* [ ] finish error checking
 
 Review/Pull requests welcome!
 
