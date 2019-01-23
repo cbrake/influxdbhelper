@@ -8,28 +8,28 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-
-
 // Decode is used to process data returned by an InfluxDb query and uses reflection
 // to transform it into an array of structs of type result.
 //
 // This function is used internally by the Query function.
-func decode(influxResult influxModels.Row, result interface{}) error {
+func decode(influxResult []influxModels.Row, result interface{}) error {
 	influxData := make([]map[string]interface{}, 0)
 
-	for _, v := range influxResult.Values {
-		r := make(map[string]interface{})
-		for i, c := range influxResult.Columns {
-			if len(v) >= i+1 {
-				r[c] = v[i]
+	for _, series := range influxResult {
+		for _, v := range series.Values {
+			r := make(map[string]interface{})
+			for i, c := range series.Columns {
+				if len(v) >= i+1 {
+					r[c] = v[i]
+				}
 			}
-		}
-		for tag, val := range influxResult.Tags {
-			r[tag] = val
-		}
-		r["InfluxMeasurement"] = influxResult.Name
+			for tag, val := range series.Tags {
+				r[tag] = val
+			}
+			r["InfluxMeasurement"] = series.Name
 
-		influxData = append(influxData, r)
+			influxData = append(influxData, r)
+		}
 	}
 
 	config := &mapstructure.DecoderConfig{
@@ -54,3 +54,4 @@ func decode(influxResult influxModels.Row, result interface{}) error {
 
 	return decoder.Decode(influxData)
 }
+

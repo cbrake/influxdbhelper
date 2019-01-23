@@ -185,8 +185,7 @@ func (c *helperClient) DecodeQuery(q string, result interface{}) (err error) {
 		return
 	}
 
-	series := results[0].Series[0]
-	err = decode(series, result)
+	err = decode(results[0].Series, result)
 
 	return
 }
