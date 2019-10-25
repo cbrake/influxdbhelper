@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/cbrake/influxdbhelper"
-	client "github.com/influxdata/influxdb/client/v2"
+	client "github.com/influxdata/influxdb1-client/v2"
 )
 
 const (

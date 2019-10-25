@@ -10,7 +10,7 @@ See [GoDoc](https://godoc.org/github.com/cbrake/influxdbhelper) for more documen
 ## Install
 
 ```
-go get github.com/influxdata/influxdb/client/v2
+go get github.com/influxdata/influxdb1-client
 go get github.com/cbrake/influxdbhelper
 ```
 
@@ -27,7 +27,7 @@ import (
 	"time"
 
 	"github.com/cbrake/influxdbhelper"
-	client "github.com/influxdata/influxdb/client/v2"
+	client "github.com/influxdata/influxdb1-client/v2"
 )
 
 const (
