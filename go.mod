@@ -1,4 +1,4 @@
-module github.com/cbrake/influxdbhelper
+module github.com/cbrake/influxdbhelper/v2
 
 require (
 	github.com/google/go-cmp v0.3.1 // indirect
