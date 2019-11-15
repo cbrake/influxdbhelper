@@ -163,7 +163,7 @@ Todo:
 * [x] handle larger query datasets (multiple series, etc)
 * [x] add write capability (directly write Go structs into influxdb)
 * [x] add godoc documentation
-* [ ] get working with influxdb 1.7 client
+* [x] get working with influxdb 1.7 client
 * [ ] see if still applicable for influxdb 2.x
 * [ ] decode/encode val0, val1, val2 fields in influx to Go array
 * [ ] use Go struct field tags to help build SELECT statement
